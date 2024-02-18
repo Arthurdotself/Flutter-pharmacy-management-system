@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "136534259025",
+    "project_id": "pharmacy-management-syst-cdbf2",
+    "storage_bucket": "pharmacy-management-syst-cdbf2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136534259025:android:06ce819ec8c2c7a3548f70",
+        "android_client_info": {
+          "package_name": "com.example.tugas1_login"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "136534259025-3a11r1ipcb24gkr9mnhdbusg732lpn1p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNWsFkaNe1smyj5mwREKat_dljaG0XI0Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "136534259025-3a11r1ipcb24gkr9mnhdbusg732lpn1p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "136534259025-fnikhbj92egfpi08drsq4q5jt79llpdv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tugas1Login"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
