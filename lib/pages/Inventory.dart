@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:tugas1_login/pages/home.dart';
 
 class Inventory extends StatefulWidget {
   const Inventory({Key? key}) : super(key: key);
@@ -41,7 +40,101 @@ class _InventoryState extends State<Inventory> {
           duration: Duration(seconds: 3), // Adjust the duration as needed
         ),
       );
+
+      // Open dialog to add fields using the scanned barcode value as new ID
+      _showAddMedicineDialog(barcodeScanRes);
     });
+  }
+
+  void _showAddMedicineDialog(String scannedBarcode) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String brand = '';
+        int cost = 0;
+        String expire = '';
+        String name = '';
+        int price = 0;
+        int amount = 0; // Add amount field
+
+        return AlertDialog(
+          title: Text("Add Medicine"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  onChanged: (value) {
+                    brand = value;
+                  },
+                  decoration: InputDecoration(labelText: 'Brand'),
+                ),
+                TextField(
+                  onChanged: (value) {
+                    cost = int.tryParse(value) ?? 0;
+                  },
+                  decoration: InputDecoration(labelText: 'Cost'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  onChanged: (value) {
+                    expire = value;
+                  },
+                  decoration: InputDecoration(labelText: 'Expire'),
+                ),
+                TextField(
+                  onChanged: (value) {
+                    name = value;
+                  },
+                  decoration: InputDecoration(labelText: 'Name'),
+                  controller: TextEditingController(text: scannedBarcode),
+                  enabled: false,
+                ),
+                TextField(
+                  onChanged: (value) {
+                    price = int.tryParse(value) ?? 0;
+                  },
+                  decoration: InputDecoration(labelText: 'Price'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  onChanged: (value) {
+                    amount = int.tryParse(value) ?? 0; // Update amount value
+                  },
+                  decoration: InputDecoration(labelText: 'Amount'), // Add amount field
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (name.isNotEmpty) {
+                  // Add the medicine to the list
+                  // Here you can add the logic to add the medicine to your database
+                  // For demonstration, I'm just printing the medicine details
+                  print('Brand: $brand');
+                  print('Cost: $cost');
+                  print('Expire: $expire');
+                  print('Name: $name');
+                  print('Price: $price');
+                  print('Amount: $amount');
+
+                  Navigator.of(context).pop(); // Close the dialog
+                }
+              },
+              child: Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
