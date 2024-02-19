@@ -70,8 +70,12 @@ class _DashbordState extends State<Dashbord> {
                                 var medicinesCount = snapshot.data!.docs.length;
                                 return Column(
                                   children: [
-                                    Text("$medicinesCount Medicines", style: TextStyle(color: Colors.white)),
-                                    SizedBox(height: 15.0),
+                                    Text(
+                                      "$medicinesCount\nMedicines",
+                                      style: TextStyle(color: Colors.white, fontSize: 19.1),
+                                    ),
+
+                                    SizedBox(height: 5.0),
                                     ElevatedButton(
                                       onPressed: () async {
                                         await showDialog(
@@ -210,10 +214,10 @@ class _DashbordState extends State<Dashbord> {
                                   return Column(
                                     children: [
                                       Text(
-                                        "$dataCount Sells",
-                                        style: TextStyle(color: Colors.white),
+                                        "$dataCount\nSells",
+                                        style: TextStyle(color: Colors.white, fontSize: 19.1),
                                       ),
-                                      SizedBox(height: 15.0),
+                                      SizedBox(height: 5.0),
                                     ],
                                   );
                                 } else {
@@ -338,7 +342,7 @@ class _DashbordState extends State<Dashbord> {
                                 },
                               );
                             },
-                            child: Text("More"),
+                            child: Text("    More    "),
                           ),
                         ],
                       )
@@ -347,13 +351,13 @@ class _DashbordState extends State<Dashbord> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Purchase invoices',
-                            style: TextStyle(color: Colors.white),
+                            'Purchase\nInvoices',
+                            style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 15.0),
+                          SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("     More     "),
+                            child: Text("    More    "),
                           ),
                         ],
                       )
@@ -362,13 +366,13 @@ class _DashbordState extends State<Dashbord> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Patient profile',
-                            style: TextStyle(color: Colors.white),
+                            'Patient\nProfile',
+                            style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 15.0),
+                          SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("     More     "),
+                            child: Text("    More    "),
                           ),
                         ],
                       )
@@ -377,13 +381,13 @@ class _DashbordState extends State<Dashbord> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Expiring',
-                            style: TextStyle(color: Colors.white),
+                            '16\nExpiring',
+                            style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 15.0),
+                          SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("     More     "),
+                            child: Text("    More    "),
                           ),
                         ],
                       )
@@ -392,13 +396,13 @@ class _DashbordState extends State<Dashbord> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Expired',
-                            style: TextStyle(color: Colors.white),
+                            '9\nExpired',
+                            style: TextStyle(color: Colors.white,fontSize: 19.1),
                           ),
-                          SizedBox(height: 15.0),
+                          SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("     More     "),
+                            child: Text("    More    "),
                           ),
                         ],
                       )
