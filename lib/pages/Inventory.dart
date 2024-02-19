@@ -331,7 +331,7 @@ class _InventoryState extends State<Inventory> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _scanBarcode,
-        child: const Icon(Icons.camera_alt),
+        child: const Icon(Icons.qr_code_scanner),
       ),
     );
   }
