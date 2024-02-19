@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Inventory extends StatefulWidget {
-  const Inventory({Key? key}) : super(key: key);
+  final String userEmail;
+
+  const Inventory({Key? key, required this.userEmail}) : super(key: key);
 
   @override
   _InventoryState createState() => _InventoryState();
@@ -12,11 +15,33 @@ class _InventoryState extends State<Inventory> {
   bool _sortAscending = true;
   int _sortColumnIndex = 0;
 
-  final List<Map<String, dynamic>> _data = [
-    {'name': 'Product 1', 'brand': 'Brand A', 'price': 10, 'quantity': 5},
-    {'name': 'Product 2', 'brand': 'Brand B', 'price': 20, 'quantity': 10},
-    // Add more data as needed
-  ];
+  final List<Map<String, dynamic>> _data = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMedicines();
+  }
+
+  Future<void> _fetchMedicines() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userEmail)
+        .collection('medicines')
+        .get();
+    final List<Map<String, dynamic>> newData = [];
+    for (final doc in querySnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      if (data.isNotEmpty) {
+        final firstField = data.keys.first;
+        newData.add({firstField: data[firstField]});
+      }
+    }
+    setState(() {
+      _data.clear();
+      _data.addAll(newData);
+    });
+  }
 
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -29,11 +54,6 @@ class _InventoryState extends State<Inventory> {
     if (!mounted) return;
 
     setState(() {
-      // Handle barcode scan result
-      print('Barcode: $barcodeScanRes');
-      // Add your logic here to process the barcode scan result
-
-      // Show the scanned barcode value in a SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Scanned Barcode: $barcodeScanRes'),
@@ -41,7 +61,6 @@ class _InventoryState extends State<Inventory> {
         ),
       );
 
-      // Open dialog to add fields using the scanned barcode value as new ID
       _showAddMedicineDialog(barcodeScanRes);
     });
   }
@@ -51,11 +70,12 @@ class _InventoryState extends State<Inventory> {
       context: context,
       builder: (BuildContext context) {
         String brand = '';
+        int dose = 0;
         int cost = 0;
         String expire = '';
         String name = '';
         int price = 0;
-        int amount = 0; // Add amount field
+        int amount = 0;
 
         return AlertDialog(
           title: Text("Add Medicine"),
@@ -64,9 +84,22 @@ class _InventoryState extends State<Inventory> {
               children: [
                 TextField(
                   onChanged: (value) {
+                    name = value;
+                  },
+                  decoration: InputDecoration(labelText: 'Name'),
+                ),
+                TextField(
+                  onChanged: (value) {
                     brand = value;
                   },
                   decoration: InputDecoration(labelText: 'Brand'),
+                ),
+                TextField(
+                  onChanged: (value) {
+                    dose = int.tryParse(value) ?? 0;
+                  },
+                  decoration: InputDecoration(labelText: 'Dose'),
+                  keyboardType: TextInputType.number,
                 ),
                 TextField(
                   onChanged: (value) {
@@ -83,14 +116,6 @@ class _InventoryState extends State<Inventory> {
                 ),
                 TextField(
                   onChanged: (value) {
-                    name = value;
-                  },
-                  decoration: InputDecoration(labelText: 'Name'),
-                  controller: TextEditingController(text: scannedBarcode),
-                  enabled: false,
-                ),
-                TextField(
-                  onChanged: (value) {
                     price = int.tryParse(value) ?? 0;
                   },
                   decoration: InputDecoration(labelText: 'Price'),
@@ -98,9 +123,9 @@ class _InventoryState extends State<Inventory> {
                 ),
                 TextField(
                   onChanged: (value) {
-                    amount = int.tryParse(value) ?? 0; // Update amount value
+                    amount = int.tryParse(value) ?? 0;
                   },
-                  decoration: InputDecoration(labelText: 'Amount'), // Add amount field
+                  decoration: InputDecoration(labelText: 'Amount'),
                   keyboardType: TextInputType.number,
                 ),
               ],
@@ -116,17 +141,50 @@ class _InventoryState extends State<Inventory> {
             TextButton(
               onPressed: () async {
                 if (name.isNotEmpty) {
-                  // Add the medicine to the list
-                  // Here you can add the logic to add the medicine to your database
-                  // For demonstration, I'm just printing the medicine details
-                  print('Brand: $brand');
-                  print('Cost: $cost');
-                  print('Expire: $expire');
-                  print('Name: $name');
-                  print('Price: $price');
-                  print('Amount: $amount');
+                  final docRef = FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(widget.userEmail)
+                      .collection('medicines')
+                      .doc(scannedBarcode);
 
-                  Navigator.of(context).pop(); // Close the dialog
+                  final docSnapshot = await docRef.get();
+
+                  if (docSnapshot.exists) {
+                    // Document exists, update the array
+                    await docRef.update({
+                      'medicines': FieldValue.arrayUnion([
+                        {
+                          'name': name,
+                          'brand': brand,
+                          'dose': dose,
+                          'expire': expire,
+                          'cost': cost,
+                          'price': price,
+                          'amount': amount,
+                        },
+                      ]),
+                    });
+                  } else {
+                    // Document does not exist, create a new document
+                    await docRef.set({
+                      'Name': name,
+                      'Brand': brand,
+                      'Dose': dose,
+                      'medicines': [
+                        {
+                          'name': name,
+                          'brand': brand,
+                          'dose': dose,
+                          'expire': expire,
+                          'cost': cost,
+                          'price': price,
+                          'amount': amount,
+                        },
+                      ],
+                    });
+                  }
+
+                  Navigator.of(context).pop();
                 }
               },
               child: Text("Save"),
@@ -186,7 +244,6 @@ class _InventoryState extends State<Inventory> {
                           style: TextStyle(color: Colors.black87),
                         ),
                       ),
-                      // Add more categories as needed
                     ],
                     onChanged: (value) {
                       // Handle category selection
@@ -220,7 +277,6 @@ class _InventoryState extends State<Inventory> {
                           style: TextStyle(color: Colors.black87),
                         ),
                       ),
-                      // Add more sorting options as needed
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -247,48 +303,27 @@ class _InventoryState extends State<Inventory> {
                 sortColumnIndex: _sortColumnIndex,
                 columns: [
                   DataColumn(
-                    label: const Text('Name'),
+                    label: const Text('First Field'),
                     onSort: (columnIndex, ascending) {
                       setState(() {
                         _sortAscending = ascending;
                         _sortColumnIndex = columnIndex;
                         if (ascending) {
-                          _data.sort((a, b) => a['name'].compareTo(b['name']));
+                          _data.sort((a, b) => a.values.first.compareTo(b.values.first));
                         } else {
-                          _data.sort((a, b) => b['name'].compareTo(a['name']));
+                          _data.sort((a, b) => b.values.first.compareTo(a.values.first));
                         }
                       });
                     },
                   ),
-                  const DataColumn(label: Text('Brand')),
-                  DataColumn(
-                    label: const Text('Price'),
-                    onSort: (columnIndex, ascending) {
-                      setState(() {
-                        _sortAscending = ascending;
-                        _sortColumnIndex = columnIndex;
-                        if (ascending) {
-                          _data.sort((a, b) => a['price'].compareTo(b['price']));
-                        } else {
-                          _data.sort((a, b) => b['price'].compareTo(a['price']));
-                        }
-                      });
-                    },
-                  ),
-                  const DataColumn(label: Text('Quantity')),
                 ],
-                rows: _data
-                    .map(
+                rows: _data.map(
                       (item) => DataRow(
                     cells: [
-                      DataCell(Text(item['name'])),
-                      DataCell(Text(item['brand'])),
-                      DataCell(Text('\$${item['price']}')),
-                      DataCell(Text('${item['quantity']}')),
+                      DataCell(Text(item.values.first.toString())),
                     ],
                   ),
-                )
-                    .toList(),
+                ).toList(),
               ),
             ),
           ),

@@ -558,7 +558,7 @@ class NavBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Inventory(),
+                  builder: (context) => const Inventory(userEmail: 'admin@pms.com',),
                 ),
               );
             },
