@@ -14,7 +14,7 @@ class Dashbord extends StatefulWidget {
   @override
   State<Dashbord> createState() => _DashbordState();
 }
-
+String currentDate = DateTime.now().toString().substring(0, 10);
 class _DashbordState extends State<Dashbord> {
   final List<String> gridLabels = [
     'medicines',
@@ -44,7 +44,7 @@ class _DashbordState extends State<Dashbord> {
           Container(height: 9,),
           Expanded(
             child: GridView.count(
-              padding: charts.DatumLegend.defaultCellPadding ,
+              padding: charts.DatumLegend.defaultCellPadding,
               crossAxisCount: 3,
               crossAxisSpacing: 10.0,
               mainAxisSpacing: 10.0,
@@ -71,19 +71,17 @@ class _DashbordState extends State<Dashbord> {
                                   children: [
                                     Text("$medicinesCount Medicines", style: TextStyle(color: Colors.white)),
                                     SizedBox(height: 15.0),
-
                                     ElevatedButton(
                                       onPressed: () async {
-                                        // Open a pop-up dialog with input fields
                                         await showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
-                                            // Variables to store input values
                                             String brand = '';
                                             int cost = 0;
                                             String expire = '';
                                             String name = '';
                                             int price = 0;
+                                            int amount = 0; // Add amount field
 
                                             return AlertDialog(
                                               title: Text("Add Medicine"),
@@ -97,7 +95,6 @@ class _DashbordState extends State<Dashbord> {
                                                   ),
                                                   TextField(
                                                     onChanged: (value) {
-                                                      // Validate and parse the cost as an integer
                                                       cost = int.tryParse(value) ?? 0;
                                                     },
                                                     decoration: InputDecoration(labelText: 'Cost'),
@@ -117,10 +114,16 @@ class _DashbordState extends State<Dashbord> {
                                                   ),
                                                   TextField(
                                                     onChanged: (value) {
-                                                      // Validate and parse the price as an integer
                                                       price = int.tryParse(value) ?? 0;
                                                     },
                                                     decoration: InputDecoration(labelText: 'Price'),
+                                                    keyboardType: TextInputType.number,
+                                                  ),
+                                                  TextField(
+                                                    onChanged: (value) {
+                                                      amount = int.tryParse(value) ?? 0; // Update amount value
+                                                    },
+                                                    decoration: InputDecoration(labelText: 'Amount'), // Add amount field
                                                     keyboardType: TextInputType.number,
                                                   ),
                                                 ],
@@ -128,7 +131,6 @@ class _DashbordState extends State<Dashbord> {
                                               actions: [
                                                 TextButton(
                                                   onPressed: () {
-                                                    // Close the dialog
                                                     Navigator.of(context).pop();
                                                   },
                                                   child: Text("Cancel"),
@@ -136,21 +138,16 @@ class _DashbordState extends State<Dashbord> {
                                                 TextButton(
                                                   onPressed: () async {
                                                     if (name.isNotEmpty) {
-                                                      // Add a new medicine with name as document ID
                                                       await FirebaseFirestore.instance.collection('users').doc(widget.userEmail).collection('medicines').doc(name).set({
                                                         'brand': brand,
                                                         'cost': cost,
                                                         'expire': expire,
                                                         'name': name,
                                                         'price': price,
-                                                        'amount': 0,
-                                                        // Add more fields as needed
+                                                        'amount': amount, // Include amount in the document
                                                       });
-                                                      // Close the dialog
                                                       Navigator.of(context).pop();
                                                     } else {
-                                                      // Show an error message if name is empty
-                                                      // You can customize this part based on your needs
                                                       showDialog(
                                                         context: context,
                                                         builder: (BuildContext context) {
@@ -177,8 +174,9 @@ class _DashbordState extends State<Dashbord> {
                                           },
                                         );
                                       },
-                                      child: Text("     More     "),
-                                    ),
+                                      child: Text("    More    "),
+                                    )
+                                    ,
                                   ],
                                 );
                               }
@@ -190,182 +188,156 @@ class _DashbordState extends State<Dashbord> {
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          FutureBuilder<QuerySnapshot>(
+                          FutureBuilder<DocumentSnapshot>(
                             future: FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(widget.userEmail)
                                 .collection('sells')
+                                .doc(currentDate)
                                 .get(),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return Text("Loading...");
                               } else if (snapshot.hasError) {
-                                return Text(
-                                    "Error: ${snapshot.error}");
+                                return Text("Error: ${snapshot.error}");
                               } else {
-                                var sellsCount =
-                                    snapshot.data!.docs.length;
-                                return Column(
-                                  children: [
-                                    Text(
-                                      "$sellsCount Sells",
-                                      style: TextStyle(
-                                          color: Colors.white),
-                                    ),
-                                    SizedBox(height: 15.0),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        // Open a pop-up dialog with input fields
-                                        await showDialog(
-                                          context: context,
-                                          builder: (BuildContext
-                                          context) {
-                                            // Variables to store input values
-                                            String name = '';
-                                            int pharmacist = 0;
-                                            String price = '';
-                                            // Get current date and time
-                                            String date =
-                                            DateTime.now()
-                                                .toString();
+                                var sellsData = snapshot.data!.data() as Map<String, dynamic>?; // Cast to Map<String, dynamic> or null
 
-                                            return AlertDialog(
-                                              title: Text(
-                                                  "Add Sale"),
-                                              content: Column(
-                                                children: [
-                                                  TextField(
-                                                    onChanged:
-                                                        (value) {
-                                                      name =
-                                                          value;
-                                                    },
-                                                    decoration: InputDecoration(
-                                                        labelText:
-                                                        'Name'),
-                                                  ),
-                                                  TextField(
-                                                    onChanged:
-                                                        (value) {
-                                                      // Validate and parse the pharmacist as an integer
-                                                      pharmacist =
-                                                          int.tryParse(
-                                                              value) ??
-                                                              0;
-                                                    },
-                                                    decoration: InputDecoration(
-                                                        labelText:
-                                                        'Pharmacist'),
-                                                    keyboardType:
-                                                    TextInputType
-                                                        .number,
-                                                  ),
-                                                  TextField(
-                                                    onChanged:
-                                                        (value) {
-                                                      price =
-                                                          value;
-                                                    },
-                                                    decoration: InputDecoration(
-                                                        labelText:
-                                                        'Price'),
-                                                  ),
-                                                  // Display the current date and time
-                                                  Text(
-                                                    'Date: $date',
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                        12.0),
-                                                  ),
-                                                ],
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    // Close the dialog
-                                                    Navigator.of(
-                                                        context)
-                                                        .pop();
-                                                  },
-                                                  child:
-                                                  Text("Cancel"),
-                                                ),
-                                                TextButton(
-                                                  onPressed:
-                                                      () async {
-                                                    if (name
-                                                        .isNotEmpty) {
-                                                      // Add a new sale
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection(
-                                                          'users')
-                                                          .doc(widget
-                                                          .userEmail)
-                                                          .collection(
-                                                          'sells')
-                                                          .add({
-                                                        'name':
-                                                        name,
-                                                        'pharmacist':
-                                                        pharmacist,
-                                                        'price':
-                                                        price,
-                                                        'date':
-                                                        date,
-                                                        'amount': 0,
-                                                        // Add more fields as needed
-                                                      });
-                                                      // Close the dialog
-                                                      Navigator.of(
-                                                          context)
-                                                          .pop();
-                                                    } else {
-                                                      // Show an error message if name is empty
-                                                      // You can customize this part based on your needs
-                                                      showDialog(
-                                                        context:
-                                                        context,
-                                                        builder:
-                                                            (BuildContext
-                                                        context) {
-                                                          return AlertDialog(
-                                                            title:
-                                                            Text(
-                                                                "Error"),
-                                                            content:
-                                                            Text(
-                                                                "Name cannot be empty."),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed:
-                                                                    () {
-                                                                  Navigator.of(context).pop();
-                                                                },
-                                                                child:
-                                                                Text("OK"),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }
-                                                  },
-                                                  child:
-                                                  Text("Add"),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Text("     More     "),
-                                    ),
-                                  ],
-                                );
+                                if (sellsData != null && sellsData.containsKey('data')) {
+                                  var dataCount = (sellsData['data'] as List).length;
+
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        "$dataCount Sells",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      SizedBox(height: 15.0),
+                                    ],
+                                  );
+                                } else {
+                                  return Text(
+                                    "No sells data found",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                }
                               }
                             },
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  String name = '';
+                                  int dose = 0;
+                                  String brand = '';
+                                  String expire = '';
+                                  String price = '';
+                                  String date = DateTime.now().toString();
+
+                                  return AlertDialog(
+                                    title: Text("Add Sale"),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          onChanged: (value) {
+                                            name = value;
+                                          },
+                                          decoration: InputDecoration(labelText: 'Name'),
+                                        ),
+                                        TextField(
+                                          onChanged: (value) {
+                                            dose = int.tryParse(value) ?? 0;
+                                          },
+                                          decoration: InputDecoration(labelText: 'Dose'),
+                                          keyboardType: TextInputType.number,
+                                        ),
+                                        TextField(
+                                          onChanged: (value) {
+                                            brand = value;
+                                          },
+                                          decoration: InputDecoration(labelText: 'Brand'),
+                                        ),
+                                        TextField(
+                                          onChanged: (value) {
+                                            expire = value;
+                                          },
+                                          decoration: InputDecoration(labelText: 'Expire'),
+                                        ),
+                                        TextField(
+                                          onChanged: (value) {
+                                            price = value;
+                                          },
+                                          decoration: InputDecoration(labelText: 'Price'),
+                                        ),
+                                        Text(
+                                          'Date: $date',
+                                          style: TextStyle(fontSize: 12.0),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          if (name.isNotEmpty) {
+                                            String currentDate = DateTime.now().toString().substring(0, 10);
+                                            CollectionReference sellsCollection = FirebaseFirestore.instance.collection('users').doc(widget.userEmail).collection('sells');
+                                            Map<String, dynamic> inputData = {
+                                              'name': name,
+                                              'dose': dose,
+                                              'brand': brand,
+                                              'expire': expire,
+                                              'price': price,
+                                            };
+                                            DocumentSnapshot sellsDoc = await sellsCollection.doc(currentDate).get();
+
+                                            if (sellsDoc.exists) {
+                                              await sellsCollection.doc(currentDate).update({
+                                                'data': FieldValue.arrayUnion([inputData]),
+                                              });
+                                            } else {
+                                              await sellsCollection.doc(currentDate).set({
+                                                'data': [inputData],
+                                              });
+                                            }
+
+                                            Navigator.of(context).pop();
+                                          } else {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text("Error"),
+                                                  content: Text("Name cannot be empty."),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      child: Text("OK"),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }
+                                        },
+                                        child: Text("Add"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text("More"),
                           ),
                         ],
                       )
@@ -379,17 +351,11 @@ class _DashbordState extends State<Dashbord> {
                           ),
                           SizedBox(height: 15.0),
                           ElevatedButton(
-                            onPressed: () {
-                              // Add your button functionality here
-                            },
+                            onPressed: () {},
                             child: Text("     More     "),
                           ),
                         ],
                       )
-
-
-// ========================================================================================
-
                           : index == 3
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -400,15 +366,11 @@ class _DashbordState extends State<Dashbord> {
                           ),
                           SizedBox(height: 15.0),
                           ElevatedButton(
-                            onPressed: () {
-                              // Add your button functionality here
-                            },
+                            onPressed: () {},
                             child: Text("     More     "),
                           ),
                         ],
                       )
-
-// ========================================================================================
                           : index == 4
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -419,15 +381,11 @@ class _DashbordState extends State<Dashbord> {
                           ),
                           SizedBox(height: 15.0),
                           ElevatedButton(
-                            onPressed: () {
-                              // Add your button functionality here
-                            },
+                            onPressed: () {},
                             child: Text("     More     "),
                           ),
                         ],
                       )
-// ========================================================================================
-
                           : index == 5
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -438,16 +396,11 @@ class _DashbordState extends State<Dashbord> {
                           ),
                           SizedBox(height: 15.0),
                           ElevatedButton(
-                            onPressed: () {
-                              // Add your button functionality here
-                            },
+                            onPressed: () {},
                             child: Text("     More     "),
                           ),
                         ],
                       )
-
-// ========================================================================================
-
                           : Text(
                         gridLabels[index],
                         style: TextStyle(color: Colors.white),
@@ -493,12 +446,19 @@ class _YourBarChartState extends State<YourBarChart> {
           .collection('sells')
           .get();
 
-      List<CounterData> data = sellsSnapshot.docs.map((doc) {
-        Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?; // Ensure correct type
-        // Use null-aware access operator and provide a default value if 'amount' is null
-        int count = dataMap?['amount'] ?? 0;
-        return CounterData(count);
-      }).toList();
+      List<CounterData> data = [];
+
+      sellsSnapshot.docs.forEach((doc) {
+        Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?;
+
+        // Get the 'data' array from the document
+        List<dynamic>? dataArray = dataMap?['data'];
+
+        // Calculate the total count of items in the 'data' array
+        int count = dataArray?.length ?? 0;
+
+        data.add(CounterData(count));
+      });
 
       setState(() {
         dailySales = data;
@@ -518,7 +478,6 @@ class _YourBarChartState extends State<YourBarChart> {
           charts.Series<CounterData, String>(
             id: 'DailySells',
             data: dailySales,
-            // Use string interpolation to concatenate the string and integer
             domainFn: (_, index) => 'Day ${index! + 1}',
             measureFn: (sales, _) => sales.count,
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
@@ -608,12 +567,6 @@ class NavBar extends StatelessWidget {
             title: const Text('Sells'),
             onTap: () {
               Navigator.pop(context);
-              //Navigator.push(
-             //   context,
-              //  MaterialPageRoute(
-              //    builder: (context) => const Sells(),
-              //  ),
-              //);
             },
           ),
           ListTile(
@@ -621,12 +574,6 @@ class NavBar extends StatelessWidget {
             title: const Text('Calender'),
             onTap: () {
               Navigator.pop(context);
-             // Navigator.push(
-              //  context,
-               // MaterialPageRoute(
-              //    builder: (context) => const Calender(),
-              //  ),
-             // );
             },
           ),
           ListTile(
@@ -634,12 +581,6 @@ class NavBar extends StatelessWidget {
             title: const Text('Notes'),
             onTap: () {
               Navigator.pop(context);
-             // Navigator.push(
-              //  context,
-              //  MaterialPageRoute(
-                 // builder: (context) => const Notes(),
-             //   ),
-             // );
             },
           ),
           const Divider(),
@@ -648,12 +589,6 @@ class NavBar extends StatelessWidget {
             title: const Text('Settings'),
             onTap: () {
               Navigator.pop(context);
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const Settings(),
-              //   ),
-              // );
             },
           ),
           const Divider(),

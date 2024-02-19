@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:tugas1_login/pages/home.dart';
 
 class Inventory extends StatefulWidget {
@@ -17,6 +18,23 @@ class _InventoryState extends State<Inventory> {
     {'name': 'Product 2', 'brand': 'Brand B', 'price': 20, 'quantity': 10},
     // Add more data as needed
   ];
+
+  Future<void> _scanBarcode() async {
+    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+      '#ff6666', // Scanner overlay color
+      'Cancel', // Cancel button text
+      true, // Use flash
+      ScanMode.BARCODE, // Scan mode
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      // Handle barcode scan result
+      print('Barcode: $barcodeScanRes');
+      // Add your logic here to process the barcode scan result
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,10 +194,8 @@ class _InventoryState extends State<Inventory> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Handle button press to add products
-        },
-        child: const Icon(Icons.add),
+        onPressed: _scanBarcode,
+        child: const Icon(Icons.camera_alt),
       ),
     );
   }
