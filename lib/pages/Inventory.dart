@@ -33,6 +33,14 @@ class _InventoryState extends State<Inventory> {
       // Handle barcode scan result
       print('Barcode: $barcodeScanRes');
       // Add your logic here to process the barcode scan result
+
+      // Show the scanned barcode value in a SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Scanned Barcode: $barcodeScanRes'),
+          duration: Duration(seconds: 3), // Adjust the duration as needed
+        ),
+      );
     });
   }
 
