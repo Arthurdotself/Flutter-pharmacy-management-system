@@ -7,6 +7,8 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tugas1_login/pages/Inventory.dart';
 import 'package:tugas1_login/pages/sells.dart';
 
+import 'notes.dart';
+
 class Dashbord extends StatefulWidget {
   final String userEmail;
 
@@ -592,6 +594,12 @@ class NavBar extends StatelessWidget {
             title: const Text('Notes'),
             onTap: () {
               Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotesPage(),
+                ),
+              );
             },
           ),
           const Divider(),
