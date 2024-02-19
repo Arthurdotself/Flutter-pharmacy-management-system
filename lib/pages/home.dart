@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tugas1_login/pages/Inventory.dart';
+import 'package:tugas1_login/pages/sells.dart';
 
 class Dashbord extends StatefulWidget {
   final String userEmail;
@@ -567,6 +568,12 @@ class NavBar extends StatelessWidget {
             title: const Text('Sells'),
             onTap: () {
               Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Sells(),
+                ),
+              );
             },
           ),
           ListTile(
