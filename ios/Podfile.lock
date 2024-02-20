@@ -728,6 +728,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_barcode_scanner (2.0.0):
     - Flutter
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - GoogleAppMeasurement (10.20.0):
     - GoogleAppMeasurement/AdIdSupport (= 10.20.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
@@ -854,6 +856,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - flutter_barcode_scanner (from `.symlinks/plugins/flutter_barcode_scanner/ios`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
@@ -899,6 +902,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_barcode_scanner:
     :path: ".symlinks/plugins/flutter_barcode_scanner/ios"
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
@@ -927,6 +932,7 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 19b3f709993d6fa1d84941d41c01e3c4c11eab93
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_barcode_scanner: 7a1144744c28dc0c57a8de7218ffe5ec59a9e4bf
+  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   GoogleAppMeasurement: bb3c564c3efb933136af0e94899e0a46167466a8
   GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
   "gRPC-C++": 2df8cba576898bdacd29f0266d5236fa0e26ba6a

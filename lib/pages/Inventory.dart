@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class Inventory extends StatefulWidget {
   final String userEmail;
@@ -10,18 +11,42 @@ class Inventory extends StatefulWidget {
   @override
   _InventoryState createState() => _InventoryState();
 }
+late Timer _timer;
 
 class _InventoryState extends State<Inventory> {
-  bool _sortAscending = true;
-  int _sortColumnIndex = 0;
-
-  final List<Map<String, dynamic>> _data = [];
+  void _fetchAndUpdateMedicines() {
+    _fetchMedicines(); // Fetch medicines from Firebase and update _data
+    setState(() {}); // Update the UI
+  }
 
   @override
   void initState() {
     super.initState();
     _fetchMedicines();
+    // Start the timer when the widget is initialized
+    _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+      _fetchAndUpdateMedicines(); // Call the function to fetch and update medicines
+    });
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Cancel the timer when the widget is disposed to prevent memory leaks
+    _timer.cancel();
+  }
+
+  bool _sortAscending = true;
+  int _sortColumnIndex = 0;
+
+  final List<Map<String, dynamic>> _data = [];
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _fetchMedicines();
+  // }
+
 
   Future<void> _fetchMedicines() async {
     final querySnapshot = await FirebaseFirestore.instance
@@ -29,19 +54,34 @@ class _InventoryState extends State<Inventory> {
         .doc(widget.userEmail)
         .collection('medicines')
         .get();
+
     final List<Map<String, dynamic>> newData = [];
-    for (final doc in querySnapshot.docs) {
+
+    querySnapshot.docs.forEach((doc) {
+      final id = doc.id;
       final data = doc.data() as Map<String, dynamic>;
-      if (data.isNotEmpty) {
-        final firstField = data.keys.first;
-        newData.add({firstField: data[firstField]});
-      }
-    }
+      final name = data['Name'] ?? '';
+      final dose = data['Dose'] ?? '';
+      final brand = data['Brand'] ?? '';
+      final shipments = data['shipments'] ?? []; // Fetch the 'shipments' array
+
+      newData.add({
+        'id': id,
+        'Name': name,
+        'Dose': dose,
+        'Brand': brand,
+        'Shipments': shipments, // Include the 'shipments' array in the map
+      });
+    });
+
     setState(() {
       _data.clear();
       _data.addAll(newData);
     });
   }
+
+
+
 
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -65,18 +105,35 @@ class _InventoryState extends State<Inventory> {
     });
   }
 
-  void _showAddMedicineDialog(String scannedBarcode) {
+  void _showAddMedicineDialog(String scannedBarcode) async {
+    String brand = '';
+    int dose = 0;
+    int cost = 0;
+    String expire = '';
+    String name = '';
+    int price = 0;
+    int amount = 0;
+
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userEmail)
+        .collection('medicines')
+        .doc(scannedBarcode);
+
+    final docSnapshot = await docRef.get();
+
+    if (docSnapshot.exists) {
+      // Document exists, populate fields with existing values
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      name = data['Name'] ?? '';
+      brand = data['Brand'] ?? '';
+      dose = data['Dose'] ?? 0;
+      // Populate other fields as needed
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String brand = '';
-        int dose = 0;
-        int cost = 0;
-        String expire = '';
-        String name = '';
-        int price = 0;
-        int amount = 0;
-
         return AlertDialog(
           title: Text("Add Medicine"),
           content: SingleChildScrollView(
@@ -87,12 +144,14 @@ class _InventoryState extends State<Inventory> {
                     name = value;
                   },
                   decoration: InputDecoration(labelText: 'Name'),
+                  controller: TextEditingController(text: name),
                 ),
                 TextField(
                   onChanged: (value) {
                     brand = value;
                   },
                   decoration: InputDecoration(labelText: 'Brand'),
+                  controller: TextEditingController(text: brand),
                 ),
                 TextField(
                   onChanged: (value) {
@@ -100,6 +159,7 @@ class _InventoryState extends State<Inventory> {
                   },
                   decoration: InputDecoration(labelText: 'Dose'),
                   keyboardType: TextInputType.number,
+                  controller: TextEditingController(text: dose.toString()),
                 ),
                 TextField(
                   onChanged: (value) {
@@ -133,7 +193,7 @@ class _InventoryState extends State<Inventory> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
               },
               child: Text("Cancel"),
@@ -152,11 +212,8 @@ class _InventoryState extends State<Inventory> {
                   if (docSnapshot.exists) {
                     // Document exists, update the array
                     await docRef.update({
-                      'medicines': FieldValue.arrayUnion([
+                      'shipments': FieldValue.arrayUnion([
                         {
-                          'name': name,
-                          'brand': brand,
-                          'dose': dose,
                           'expire': expire,
                           'cost': cost,
                           'price': price,
@@ -170,11 +227,8 @@ class _InventoryState extends State<Inventory> {
                       'Name': name,
                       'Brand': brand,
                       'Dose': dose,
-                      'medicines': [
+                      'shipments': [
                         {
-                          'name': name,
-                          'brand': brand,
-                          'dose': dose,
                           'expire': expire,
                           'cost': cost,
                           'price': price,
@@ -194,6 +248,7 @@ class _InventoryState extends State<Inventory> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -299,40 +354,140 @@ class _InventoryState extends State<Inventory> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
+                dataRowHeight: null, // Set dataRowHeight to null to remove checkboxes
                 sortAscending: _sortAscending,
                 sortColumnIndex: _sortColumnIndex,
+                columnSpacing: 45.0, // Adjust the spacing between columns
                 columns: [
                   DataColumn(
-                    label: const Text('First Field'),
+                    label: const Text('Name'),
                     onSort: (columnIndex, ascending) {
                       setState(() {
                         _sortAscending = ascending;
                         _sortColumnIndex = columnIndex;
                         if (ascending) {
-                          _data.sort((a, b) => a.values.first.compareTo(b.values.first));
+                          _data.sort((a, b) => a['Name'].compareTo(b['Name']));
                         } else {
-                          _data.sort((a, b) => b.values.first.compareTo(a.values.first));
+                          _data.sort((a, b) => b['Name'].compareTo(a['Name']));
                         }
                       });
                     },
                   ),
+                  DataColumn(label: const Text('Brand')),
+                  DataColumn(label: const Text('Dose')),
+                  DataColumn(label: const Text('Quantity')), // Add new column for total amount
                 ],
                 rows: _data.map(
-                      (item) => DataRow(
-                    cells: [
-                      DataCell(Text(item.values.first.toString())),
-                    ],
-                  ),
+                      (item) {
+                    // Calculate total amount
+                    num totalAmount = 0;
+                    item['Shipments']?.forEach((shipment) {
+                      totalAmount += shipment?['amount'] ?? 0;
+                    });
+
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          GestureDetector(
+                            onTap: () {
+                              _showShipmentsDialog(item['Shipments']);
+                            },
+                            child: Text(item['Name']),
+                          ),
+                        ),
+                        DataCell(
+                          GestureDetector(
+                            onTap: () {
+                              _showShipmentsDialog(item['Shipments']);
+                            },
+                            child: Text(item['Brand']),
+                          ),
+                        ),
+                        DataCell(
+                          GestureDetector(
+                            onTap: () {
+                              _showShipmentsDialog(item['Shipments']);
+                            },
+                            child: Text('${item['Dose']}'),
+                          ),
+                        ),
+                        DataCell(Text(totalAmount.toString())), // Convert to string
+                      ],
+                    );
+                  },
                 ).toList(),
               ),
             ),
           ),
         ],
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _scanBarcode,
         child: const Icon(Icons.qr_code_scanner),
       ),
     );
+
   }
+  bool _isExpanded = false;
+  Map<String, dynamic>? _selectedRowData;
+
+
+
+  void _toggleExpandedState(Map<String, dynamic> rowData) {
+    setState(() {
+      if (_selectedRowData == rowData) {
+        _isExpanded = false;
+        _selectedRowData = null;
+      } else {
+        _isExpanded = true;
+        _selectedRowData = rowData;
+      }
+    });
+  }
+
+  void _showShipmentsDialog(List<dynamic> shipments) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Shipments'),
+          content: Container(
+            width: double.maxFinite,
+            height: 300.0, // Adjust the height as needed
+            child: ListView.builder(
+              itemCount: shipments.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    title: Text('Expire: ${shipments[index]['expire']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Cost: ${shipments[index]['cost']}'),
+                        Text('Price: ${shipments[index]['price']}'),
+                        Text('Amount: ${shipments[index]['amount']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 }
+

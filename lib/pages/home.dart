@@ -79,106 +79,13 @@ class _DashbordState extends State<Dashbord> {
 
                                     SizedBox(height: 5.0),
                                     ElevatedButton(
-                                      onPressed: () async {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            String brand = '';
-                                            int cost = 0;
-                                            String expire = '';
-                                            String name = '';
-                                            int price = 0;
-                                            int amount = 0; // Add amount field
-
-                                            return AlertDialog(
-                                              title: Text("Add Medicine"),
-                                              content: Column(
-                                                children: [
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      brand = value;
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Brand'),
-                                                  ),
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      cost = int.tryParse(value) ?? 0;
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Cost'),
-                                                    keyboardType: TextInputType.number,
-                                                  ),
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      expire = value;
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Expire'),
-                                                  ),
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      name = value;
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Name'),
-                                                  ),
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      price = int.tryParse(value) ?? 0;
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Price'),
-                                                    keyboardType: TextInputType.number,
-                                                  ),
-                                                  TextField(
-                                                    onChanged: (value) {
-                                                      amount = int.tryParse(value) ?? 0; // Update amount value
-                                                    },
-                                                    decoration: InputDecoration(labelText: 'Amount'), // Add amount field
-                                                    keyboardType: TextInputType.number,
-                                                  ),
-                                                ],
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text("Cancel"),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () async {
-                                                    if (name.isNotEmpty) {
-                                                      await FirebaseFirestore.instance.collection('users').doc(widget.userEmail).collection('medicines').doc(name).set({
-                                                        'brand': brand,
-                                                        'cost': cost,
-                                                        'expire': expire,
-                                                        'name': name,
-                                                        'price': price,
-                                                        'amount': amount, // Include amount in the document
-                                                      });
-                                                      Navigator.of(context).pop();
-                                                    } else {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            title: Text("Error"),
-                                                            content: Text("Name cannot be empty."),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                },
-                                                                child: Text("OK"),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }
-                                                  },
-                                                  child: Text("Add"),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                      onPressed: ()  {
+                                       // Navigator.pop(context);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const Inventory(userEmail: 'admin@pms.com',),
+                                          ),
                                         );
                                       },
                                       child: Text("    More    "),
