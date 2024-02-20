@@ -33,15 +33,17 @@ class _DashbordState extends State<Dashbord> {
           'Home',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue[50],
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       drawer: const NavBar(),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue[50],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(height: 9,),
+          Container(height: 40,
+          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+          child: Text("Pharmacist Dashboard",style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),),
           Expanded(
             child: GridView.count(
               padding: charts.DatumLegend.defaultCellPadding,
@@ -49,10 +51,29 @@ class _DashbordState extends State<Dashbord> {
               crossAxisSpacing: 10.0,
               mainAxisSpacing: 10.0,
               children: List.generate(6, (index) {
+                Color? gridColor; // Default color
+                if (index == 0) {
+                  gridColor = Colors.blue[200]; // Change color for the first grid
+                }
+                if (index == 1) {
+                  gridColor = Colors.indigo[200]; // Change color for the first grid
+                }
+                if (index == 2) {
+                  gridColor = Colors.blue[200]; // Change color for the first grid
+                }
+                if (index == 3) {
+                  gridColor = Colors.indigo[200]; // Change color for the first grid
+                }
+                if (index == 4) {
+                  gridColor = Colors.blue[200]; // Change color for the first grid
+                }
+                if (index == 5) {
+                  gridColor = Colors.indigo[200]; // Change color for the first grid
+                }
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(22.0),
                   child: Container(
-                    color: Colors.blue,
+                    color: gridColor,
                     child: Center(
                       child: index == 0
                           ? Column(
@@ -73,11 +94,10 @@ class _DashbordState extends State<Dashbord> {
                                       "$medicinesCount\nMedicines",
                                       style: const TextStyle(color: Colors.white, fontSize: 19.1),
                                     ),
-
                                     const SizedBox(height: 5.0),
                                     ElevatedButton(
                                       onPressed: ()  {
-                                       // Navigator.pop(context);
+                                        // Navigator.pop(context);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -86,8 +106,7 @@ class _DashbordState extends State<Dashbord> {
                                         );
                                       },
                                       child: const Text("    More    "),
-                                    )
-                                    ,
+                                    ),
                                   ],
                                 );
                               }
@@ -322,6 +341,17 @@ class _DashbordState extends State<Dashbord> {
               }),
             ),
           ),
+          Container(
+            height: 70,
+
+            margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
+
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10), // Adjust the value as needed
+            ),
+          ),
+
           Expanded(
             child: YourBarChart(userEmail: widget.userEmail),
           ),
@@ -391,7 +421,7 @@ class _YourBarChartState extends State<YourBarChart> {
             data: dailySales,
             domainFn: (_, index) => 'Day ${index! + 1}',
             measureFn: (sales, _) => sales.count,
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+            colorFn: (_, __) => charts.ColorUtil.fromDartColor(Colors.blue[200]!),
           ),
         ],
         animate: true,
@@ -409,6 +439,7 @@ class _YourBarChartState extends State<YourBarChart> {
     );
   }
 }
+
 
 class CounterData {
   final int count;
