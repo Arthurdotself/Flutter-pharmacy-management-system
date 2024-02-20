@@ -32,7 +32,7 @@ class _SellsState extends State<Sells> {
                   _selectedTimePeriod = value!;
                 });
               },
-              items: ['Today', 'Yesterday', 'Last Week', 'Last Month', 'Older']
+              items: ['Today', 'Yesterday', 'Last Week', 'Last Month', 'Pick Date'] 
                   .map((period) => DropdownMenuItem(
                 value: period,
                 child: Text(period),
