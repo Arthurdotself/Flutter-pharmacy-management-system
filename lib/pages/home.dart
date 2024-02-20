@@ -28,26 +28,33 @@ class _DashbordState extends State<Dashbord> {
     'Expired',
   ];
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        appBar: AppBar(
+          title: const Text(
+            'Home',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.blue[50],
+          iconTheme: const IconThemeData(color: Colors.black),
         ),
+        drawer: NavBar(userEmail: widget.userEmail),
         backgroundColor: Colors.blue[50],
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      drawer: NavBar(userEmail: widget.userEmail),
-      backgroundColor: Colors.blue[50],
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(height: 40,
-          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-          child: Text("Pharmacist Dashboard",style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),),
-          Expanded(
+    body: SingleChildScrollView(
+    child: Container( // Wrap the Column with Container
+    height: MediaQuery.of(context).size.height, // Provide a fixed height or use Expanded
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+              Container(
+                height: 40,
+                margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: Text(
+                  "Pharmacist Dashboard",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
             child: GridView.count(
               padding: charts.DatumLegend.defaultCellPadding,
               crossAxisCount: 3,
@@ -355,12 +362,14 @@ class _DashbordState extends State<Dashbord> {
             ),
           ),
 
-          Expanded(
+          Flexible(
             child: YourBarChart(userEmail: widget.userEmail),
           ),
         ],
       ),
-    );
+    )
+
+    ));
   }
 }
 
