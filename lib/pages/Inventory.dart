@@ -24,7 +24,7 @@ class _InventoryState extends State<Inventory> {
     super.initState();
     _fetchMedicines();
     // Start the timer when the widget is initialized
-    _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
       _fetchAndUpdateMedicines(); // Call the function to fetch and update medicines
     });
   }
@@ -57,9 +57,9 @@ class _InventoryState extends State<Inventory> {
 
     final List<Map<String, dynamic>> newData = [];
 
-    querySnapshot.docs.forEach((doc) {
+    for (var doc in querySnapshot.docs) {
       final id = doc.id;
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       final name = data['Name'] ?? '';
       final dose = data['Dose'] ?? '';
       final brand = data['Brand'] ?? '';
@@ -72,7 +72,7 @@ class _InventoryState extends State<Inventory> {
         'Brand': brand,
         'Shipments': shipments, // Include the 'shipments' array in the map
       });
-    });
+    }
 
     setState(() {
       _data.clear();
@@ -97,7 +97,7 @@ class _InventoryState extends State<Inventory> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Scanned Barcode: $barcodeScanRes'),
-          duration: Duration(seconds: 3), // Adjust the duration as needed
+          duration: const Duration(seconds: 3), // Adjust the duration as needed
         ),
       );
 
@@ -135,7 +135,7 @@ class _InventoryState extends State<Inventory> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Add Medicine"),
+          title: const Text("Add Medicine"),
           content: SingleChildScrollView(
             child: Column(
               children: [
@@ -143,21 +143,21 @@ class _InventoryState extends State<Inventory> {
                   onChanged: (value) {
                     name = value;
                   },
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Name'),
                   controller: TextEditingController(text: name),
                 ),
                 TextField(
                   onChanged: (value) {
                     brand = value;
                   },
-                  decoration: InputDecoration(labelText: 'Brand'),
+                  decoration: const InputDecoration(labelText: 'Brand'),
                   controller: TextEditingController(text: brand),
                 ),
                 TextField(
                   onChanged: (value) {
                     dose = int.tryParse(value) ?? 0;
                   },
-                  decoration: InputDecoration(labelText: 'Dose'),
+                  decoration: const InputDecoration(labelText: 'Dose'),
                   keyboardType: TextInputType.number,
                   controller: TextEditingController(text: dose.toString()),
                 ),
@@ -165,27 +165,27 @@ class _InventoryState extends State<Inventory> {
                   onChanged: (value) {
                     cost = int.tryParse(value) ?? 0;
                   },
-                  decoration: InputDecoration(labelText: 'Cost'),
+                  decoration: const InputDecoration(labelText: 'Cost'),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   onChanged: (value) {
                     expire = value;
                   },
-                  decoration: InputDecoration(labelText: 'Expire'),
+                  decoration: const InputDecoration(labelText: 'Expire'),
                 ),
                 TextField(
                   onChanged: (value) {
                     price = int.tryParse(value) ?? 0;
                   },
-                  decoration: InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   onChanged: (value) {
                     amount = int.tryParse(value) ?? 0;
                   },
-                  decoration: InputDecoration(labelText: 'Amount'),
+                  decoration: const InputDecoration(labelText: 'Amount'),
                   keyboardType: TextInputType.number,
                 ),
               ],
@@ -196,7 +196,7 @@ class _InventoryState extends State<Inventory> {
               onPressed: () async {
                 Navigator.of(context).pop();
               },
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
             ),
             TextButton(
               onPressed: () async {
@@ -241,7 +241,7 @@ class _InventoryState extends State<Inventory> {
                   Navigator.of(context).pop();
                 }
               },
-              child: Text("Save"),
+              child: const Text("Save"),
             ),
           ],
         );
@@ -373,9 +373,9 @@ class _InventoryState extends State<Inventory> {
                       });
                     },
                   ),
-                  DataColumn(label: const Text('Brand')),
-                  DataColumn(label: const Text('Dose')),
-                  DataColumn(label: const Text('Quantity')), // Add new column for total amount
+                  const DataColumn(label: Text('Brand')),
+                  const DataColumn(label: Text('Dose')),
+                  const DataColumn(label: Text('Quantity')), // Add new column for total amount
                 ],
                 rows: _data.map(
                       (item) {
@@ -451,15 +451,15 @@ class _InventoryState extends State<Inventory> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Shipments'),
-          content: Container(
+          title: const Text('Shipments'),
+          content: SizedBox(
             width: double.maxFinite,
             height: 300.0, // Adjust the height as needed
             child: ListView.builder(
               itemCount: shipments.length,
               itemBuilder: (BuildContext context, int index) {
                 return Card(
-                  margin: EdgeInsets.symmetric(vertical: 4.0),
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ListTile(
                     title: Text('Expire: ${shipments[index]['expire']}'),
                     subtitle: Column(
@@ -480,7 +480,7 @@ class _InventoryState extends State<Inventory> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close'),
+              child: const Text('Close'),
             ),
           ],
         );

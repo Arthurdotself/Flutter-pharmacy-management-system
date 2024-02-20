@@ -21,7 +21,7 @@ class _NotesPageState extends State<NotesPage> {
 
   Future<void> _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -48,10 +48,10 @@ class _NotesPageState extends State<NotesPage> {
                 onChanged: (value) {
                   textController.text = value;
                 },
-                decoration: InputDecoration(hintText: 'Enter your note here'),
+                decoration: const InputDecoration(hintText: 'Enter your note here'),
               ),
               CheckboxListTile(
-                title: Text('Enable Notification'),
+                title: const Text('Enable Notification'),
                 value: enableNotification,
                 onChanged: (value) {
                   setState(() {
@@ -108,7 +108,7 @@ class _NotesPageState extends State<NotesPage> {
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Note cannot be empty or contain only spaces!'),
                     ),
                   );
@@ -120,7 +120,7 @@ class _NotesPageState extends State<NotesPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -153,20 +153,20 @@ class _NotesPageState extends State<NotesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
+        title: const Text('Notes'),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         itemCount: notes.length * 2 + 1, // Corrected item count
         itemBuilder: (BuildContext context, int index) {
           if (index.isOdd) {
             // Separator
-            return Divider();
+            return const Divider();
           }
           final noteIndex = index ~/ 2;
           if (noteIndex >= notes.length) {
             // Handle out-of-range index
-            return SizedBox.shrink(); // Return an empty widget
+            return const SizedBox.shrink(); // Return an empty widget
           }
           return ListTile(
             title: Text(notes[noteIndex].text),
@@ -174,7 +174,7 @@ class _NotesPageState extends State<NotesPage> {
               _showAddNoteDialog(index: noteIndex, initialNote: notes[noteIndex]);
             },
             trailing: IconButton(
-              icon: Icon(Icons.delete),
+              icon: const Icon(Icons.delete),
               onPressed: () {
                 _deleteNote(noteIndex);
               },
@@ -186,7 +186,7 @@ class _NotesPageState extends State<NotesPage> {
         onPressed: () {
           _showAddNoteDialog();
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -203,7 +203,7 @@ class Note {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: NotesPage(),
   ));
 }

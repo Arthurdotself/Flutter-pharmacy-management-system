@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tugas1_login/pages/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 

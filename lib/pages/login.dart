@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'package:tugas1_login/pages/reset_password.dart';
 import 'package:tugas1_login/pages/signup.dart';
@@ -116,7 +115,7 @@ class _LoginState extends State<Login> {
                         animType: AnimType.rightSlide,
                         title: 'Error',
                         desc: 'No user found for that email.')
-                      ..show();
+                      .show();
                   }
                 },
               )),
@@ -158,7 +157,7 @@ class _LoginState extends State<Login> {
   }
 
   Widget _userInfo() {
-    return SizedBox();
+    return const SizedBox();
   }
 
   void _handleGoogleSinIn() {

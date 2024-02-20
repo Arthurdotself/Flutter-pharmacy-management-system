@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tugas1_login/pages/reset_password.dart';
 import 'package:tugas1_login/pages/login.dart';
 
 class Signup extends StatefulWidget {

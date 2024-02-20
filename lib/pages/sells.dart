@@ -23,7 +23,7 @@ class _SellsState extends State<Sells> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButtonFormField<String>(
               value: _selectedTimePeriod,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Time Period',
                 border: OutlineInputBorder(),
               ),

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tugas1_login/pages/Inventory.dart';
 import 'package:tugas1_login/pages/sells.dart';
@@ -65,7 +62,7 @@ class _DashbordState extends State<Dashbord> {
                             future: FirebaseFirestore.instance.collection('users').doc(widget.userEmail).collection('medicines').get(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return Text("Loading...");
+                                return const Text("Loading...");
                               } else if (snapshot.hasError) {
                                 return Text("Error: ${snapshot.error}");
                               } else {
@@ -74,10 +71,10 @@ class _DashbordState extends State<Dashbord> {
                                   children: [
                                     Text(
                                       "$medicinesCount\nMedicines",
-                                      style: TextStyle(color: Colors.white, fontSize: 19.1),
+                                      style: const TextStyle(color: Colors.white, fontSize: 19.1),
                                     ),
 
-                                    SizedBox(height: 5.0),
+                                    const SizedBox(height: 5.0),
                                     ElevatedButton(
                                       onPressed: ()  {
                                        // Navigator.pop(context);
@@ -88,7 +85,7 @@ class _DashbordState extends State<Dashbord> {
                                           ),
                                         );
                                       },
-                                      child: Text("    More    "),
+                                      child: const Text("    More    "),
                                     )
                                     ,
                                   ],
@@ -111,7 +108,7 @@ class _DashbordState extends State<Dashbord> {
                                 .get(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return Text("Loading...");
+                                return const Text("Loading...");
                               } else if (snapshot.hasError) {
                                 return Text("Error: ${snapshot.error}");
                               } else {
@@ -124,13 +121,13 @@ class _DashbordState extends State<Dashbord> {
                                     children: [
                                       Text(
                                         "$dataCount\nSells",
-                                        style: TextStyle(color: Colors.white, fontSize: 19.1),
+                                        style: const TextStyle(color: Colors.white, fontSize: 19.1),
                                       ),
-                                      SizedBox(height: 5.0),
+                                      const SizedBox(height: 5.0),
                                     ],
                                   );
                                 } else {
-                                  return Text(
+                                  return const Text(
                                     "No sells data found",
                                     style: TextStyle(color: Colors.white),
                                   );
@@ -151,7 +148,7 @@ class _DashbordState extends State<Dashbord> {
                                   String date = DateTime.now().toString();
 
                                   return AlertDialog(
-                                    title: Text("Add Sale"),
+                                    title: const Text("Add Sale"),
                                     content: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -159,36 +156,36 @@ class _DashbordState extends State<Dashbord> {
                                           onChanged: (value) {
                                             name = value;
                                           },
-                                          decoration: InputDecoration(labelText: 'Name'),
+                                          decoration: const InputDecoration(labelText: 'Name'),
                                         ),
                                         TextField(
                                           onChanged: (value) {
                                             dose = int.tryParse(value) ?? 0;
                                           },
-                                          decoration: InputDecoration(labelText: 'Dose'),
+                                          decoration: const InputDecoration(labelText: 'Dose'),
                                           keyboardType: TextInputType.number,
                                         ),
                                         TextField(
                                           onChanged: (value) {
                                             brand = value;
                                           },
-                                          decoration: InputDecoration(labelText: 'Brand'),
+                                          decoration: const InputDecoration(labelText: 'Brand'),
                                         ),
                                         TextField(
                                           onChanged: (value) {
                                             expire = value;
                                           },
-                                          decoration: InputDecoration(labelText: 'Expire'),
+                                          decoration: const InputDecoration(labelText: 'Expire'),
                                         ),
                                         TextField(
                                           onChanged: (value) {
                                             price = value;
                                           },
-                                          decoration: InputDecoration(labelText: 'Price'),
+                                          decoration: const InputDecoration(labelText: 'Price'),
                                         ),
                                         Text(
                                           'Date: $date',
-                                          style: TextStyle(fontSize: 12.0),
+                                          style: const TextStyle(fontSize: 12.0),
                                         ),
                                       ],
                                     ),
@@ -197,7 +194,7 @@ class _DashbordState extends State<Dashbord> {
                                         onPressed: () {
                                           Navigator.of(context).pop();
                                         },
-                                        child: Text("Cancel"),
+                                        child: const Text("Cancel"),
                                       ),
                                       TextButton(
                                         onPressed: () async {
@@ -229,14 +226,14 @@ class _DashbordState extends State<Dashbord> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  title: Text("Error"),
-                                                  content: Text("Name cannot be empty."),
+                                                  title: const Text("Error"),
+                                                  content: const Text("Name cannot be empty."),
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                       },
-                                                      child: Text("OK"),
+                                                      child: const Text("OK"),
                                                     ),
                                                   ],
                                                 );
@@ -244,14 +241,14 @@ class _DashbordState extends State<Dashbord> {
                                             );
                                           }
                                         },
-                                        child: Text("Add"),
+                                        child: const Text("Add"),
                                       ),
                                     ],
                                   );
                                 },
                               );
                             },
-                            child: Text("    More    "),
+                            child: const Text("    More    "),
                           ),
                         ],
                       )
@@ -259,14 +256,14 @@ class _DashbordState extends State<Dashbord> {
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
+                          const Text(
                             'Purchase\nInvoices',
                             style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 5.0),
+                          const SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("    More    "),
+                            child: const Text("    More    "),
                           ),
                         ],
                       )
@@ -274,14 +271,14 @@ class _DashbordState extends State<Dashbord> {
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
+                          const Text(
                             'Patient\nProfile',
                             style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 5.0),
+                          const SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("    More    "),
+                            child: const Text("    More    "),
                           ),
                         ],
                       )
@@ -289,14 +286,14 @@ class _DashbordState extends State<Dashbord> {
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
+                          const Text(
                             '16\nExpiring',
                             style: TextStyle(color: Colors.white, fontSize: 19.1),
                           ),
-                          SizedBox(height: 5.0),
+                          const SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("    More    "),
+                            child: const Text("    More    "),
                           ),
                         ],
                       )
@@ -304,20 +301,20 @@ class _DashbordState extends State<Dashbord> {
                           ? Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
+                          const Text(
                             '9\nExpired',
                             style: TextStyle(color: Colors.white,fontSize: 19.1),
                           ),
-                          SizedBox(height: 5.0),
+                          const SizedBox(height: 5.0),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("    More    "),
+                            child: const Text("    More    "),
                           ),
                         ],
                       )
                           : Text(
                         gridLabels[index],
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -362,7 +359,7 @@ class _YourBarChartState extends State<YourBarChart> {
 
       List<CounterData> data = [];
 
-      sellsSnapshot.docs.forEach((doc) {
+      for (var doc in sellsSnapshot.docs) {
         Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?;
 
         // Get the 'data' array from the document
@@ -372,7 +369,7 @@ class _YourBarChartState extends State<YourBarChart> {
         int count = dataArray?.length ?? 0;
 
         data.add(CounterData(count));
-      });
+      }
 
       setState(() {
         dailySales = data;
@@ -406,7 +403,7 @@ class _YourBarChartState extends State<YourBarChart> {
           ),
         ],
       )
-          : Center(
+          : const Center(
         child: CircularProgressIndicator(),
       ),
     );
