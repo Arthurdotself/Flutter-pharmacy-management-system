@@ -56,7 +56,9 @@ class _DashbordState extends State<Dashbord> {
               ),
               Expanded(
             child: GridView.count(
+              shrinkWrap: true,
               padding: charts.DatumLegend.defaultCellPadding,
+              physics: NeverScrollableScrollPhysics(),
               crossAxisCount: 3,
               crossAxisSpacing: 10.0,
               mainAxisSpacing: 10.0,
@@ -603,7 +605,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Sells(),
+                        builder: (context) => Sells(userEmail: userEmail, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF'),
                       ),
                     );
                   },
