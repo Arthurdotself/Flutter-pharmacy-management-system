@@ -3,14 +3,19 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
+
+
 class Inventory extends StatefulWidget {
   final String userEmail;
+  final String pharmacyId;
 
-  const Inventory({Key? key, required this.userEmail}) : super(key: key);
+  const Inventory({Key? key, required this.userEmail, required this.pharmacyId}) : super(key: key);
 
   @override
   _InventoryState createState() => _InventoryState();
 }
+
+String _pharmacyName = '';
 late Timer _timer;
 
 class _InventoryState extends State<Inventory> {
@@ -41,17 +46,29 @@ class _InventoryState extends State<Inventory> {
 
   final List<Map<String, dynamic>> _data = [];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _fetchMedicines();
-  // }
-
-
   Future<void> _fetchMedicines() async {
-    final querySnapshot = await FirebaseFirestore.instance
+    // Fetch pharmacyId from user document
+    final userDataSnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userEmail)
+        .get();
+    final  pharmacyId = userDataSnapshot['pharmacyId'];
+
+    // Fetch pharmacy name
+    final pharmacySnapshot = await FirebaseFirestore.instance
+        .collection('pharmacies')
+        .doc(pharmacyId)
+        .get();
+    if (pharmacySnapshot.exists) {
+      setState(() {
+        _pharmacyName = pharmacySnapshot['name'];
+      });
+    }
+
+    // Fetch all medicines for the pharmacyId
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('pharmacies')
+        .doc(pharmacyId)
         .collection('medicines')
         .get();
 
@@ -63,14 +80,14 @@ class _InventoryState extends State<Inventory> {
       final name = data['Name'] ?? '';
       final dose = data['Dose'] ?? '';
       final brand = data['Brand'] ?? '';
-      final shipments = data['shipments'] ?? []; // Fetch the 'shipments' array
+      final shipments = data['shipments'] ?? [];
 
       newData.add({
         'id': id,
         'Name': name,
         'Dose': dose,
         'Brand': brand,
-        'Shipments': shipments, // Include the 'shipments' array in the map
+        'Shipments': shipments,
       });
     }
 
@@ -79,9 +96,6 @@ class _InventoryState extends State<Inventory> {
       _data.addAll(newData);
     });
   }
-
-
-
 
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -96,12 +110,12 @@ class _InventoryState extends State<Inventory> {
     setState(() {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Scanned Barcode: $barcodeScanRes'),
+          content: Text('Scanned Barcode: $barcodeScanRes $widget.pharmacyId'),
           duration: const Duration(seconds: 3), // Adjust the duration as needed
         ),
       );
 
-      _showAddMedicineDialog(barcodeScanRes);
+      _showAddMedicineDialog(barcodeScanRes );
     });
   }
 
@@ -115,8 +129,8 @@ class _InventoryState extends State<Inventory> {
     int amount = 0;
 
     final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userEmail)
+        .collection('pharmacies')
+        .doc(widget.pharmacyId)
         .collection('medicines')
         .doc(scannedBarcode);
 
@@ -163,13 +177,6 @@ class _InventoryState extends State<Inventory> {
                 ),
                 TextField(
                   onChanged: (value) {
-                    cost = int.tryParse(value) ?? 0;
-                  },
-                  decoration: const InputDecoration(labelText: 'Cost'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  onChanged: (value) {
                     expire = value;
                   },
                   decoration: const InputDecoration(labelText: 'Expire'),
@@ -201,9 +208,16 @@ class _InventoryState extends State<Inventory> {
             TextButton(
               onPressed: () async {
                 if (name.isNotEmpty) {
-                  final docRef = FirebaseFirestore.instance
+                  final pharmacySnapshot = await FirebaseFirestore.instance
                       .collection('users')
                       .doc(widget.userEmail)
+                      .get();
+
+                  final pharmacyId = pharmacySnapshot['pharmacyId'];
+
+                  final docRef = FirebaseFirestore.instance
+                      .collection('pharmacies')
+                      .doc(pharmacyId)
                       .collection('medicines')
                       .doc(scannedBarcode);
 
@@ -242,6 +256,7 @@ class _InventoryState extends State<Inventory> {
                 }
               },
               child: const Text("Save"),
+
             ),
           ],
         );
@@ -249,11 +264,12 @@ class _InventoryState extends State<Inventory> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventory')),
+      appBar: AppBar(
+        title: Text('Inventory - $_pharmacyName'),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -427,23 +443,6 @@ class _InventoryState extends State<Inventory> {
         child: const Icon(Icons.qr_code_scanner),
       ),
     );
-
-  }
-  bool _isExpanded = false;
-  Map<String, dynamic>? _selectedRowData;
-
-
-
-  void _toggleExpandedState(Map<String, dynamic> rowData) {
-    setState(() {
-      if (_selectedRowData == rowData) {
-        _isExpanded = false;
-        _selectedRowData = null;
-      } else {
-        _isExpanded = true;
-        _selectedRowData = rowData;
-      }
-    });
   }
 
   void _showShipmentsDialog(List<dynamic> shipments) {
@@ -487,7 +486,4 @@ class _InventoryState extends State<Inventory> {
       },
     );
   }
-
-
 }
-

@@ -36,7 +36,7 @@ class _DashbordState extends State<Dashbord> {
         backgroundColor: Colors.blue[50],
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      drawer: const NavBar(),
+      drawer: NavBar(userEmail: widget.userEmail),
       backgroundColor: Colors.blue[50],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,7 +101,7 @@ class _DashbordState extends State<Dashbord> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => const Inventory(userEmail: 'admin@pms.com',),
+                                            builder: (context) => const Inventory(userEmail: 'admin@pms.com',pharmacyId:'KYFUz7GO7IHV8tsLAYGF'),
                                           ),
                                         );
                                       },
@@ -448,112 +448,129 @@ class CounterData {
 }
 
 class NavBar extends StatelessWidget {
-  const NavBar({Key? key}) : super(key: key);
+  final String userEmail;
+
+  const NavBar({Key? key, required this.userEmail}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-        children: [
-          const DrawerHeader(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance.collection('users').doc(userEmail).get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else {
+            var userData = snapshot.data!.data() as Map<String, dynamic>?;
+            var userName = userData?['name'] ?? 'Name';
+            var userEmail = userData?['email'] ?? 'Email';
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtuphMb4mq-EcVWhMVT8FCkv5dqZGgvn_QiA&usqp=CAU',
+                DrawerHeader(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtuphMb4mq-EcVWhMVT8FCkv5dqZGgvn_QiA&usqp=CAU',
+                        ),
+                        radius: 30,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        userName,
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        userEmail,
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                  radius: 30,
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Belal',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 16,
-                  ),
+                ListTile(
+                  leading: Icon(Icons.home_outlined),
+                  title: Text('Home'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                Text(
-                  'belal@gmail.com',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
+                ListTile(
+                  leading: Icon(Icons.inventory_2_outlined),
+                  title: Text('Inventory'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Inventory(userEmail: userEmail, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF'),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.attach_money),
+                  title: Text('Sells'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Sells(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.calendar_month),
+                  title: Text('Calender'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.note_alt_outlined),
+                  title: Text('Notes'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotesPage(),
+                      ),
+                    );
+                  },
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                Divider(),
+                ListTile(
+                  title: Text('LogOut'),
+                  leading: Icon(Icons.exit_to_app),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
               ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home_outlined),
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2_outlined),
-            title: const Text('Inventory'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Inventory(userEmail: 'admin@pms.com',),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.attach_money),
-            title: const Text('Sells'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Sells(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.calendar_month),
-            title: const Text('Calender'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note_alt_outlined),
-            title: const Text('Notes'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotesPage(),
-                ),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('LogOut'),
-            leading: const Icon(Icons.exit_to_app),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
+            );
+          }
+        },
       ),
     );
   }
