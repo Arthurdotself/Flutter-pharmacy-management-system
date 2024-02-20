@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'dart:io';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tugas1_login/pages/Inventory.dart';
 import 'package:tugas1_login/pages/sells.dart';
-
+import 'package:tugas1_login/pages/notes.dart';
 import 'notes.dart';
 
 class Dashbord extends StatefulWidget {
@@ -452,6 +455,68 @@ class NavBar extends StatelessWidget {
 
   const NavBar({Key? key, required this.userEmail}) : super(key: key);
 
+  Future<void> _uploadImage(BuildContext context) async {
+    final ImagePicker picker = ImagePicker(); // Declare _picker here
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose Image Source'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                GestureDetector(
+                  child: Text('Take Photo'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _getImage(picker, ImageSource.camera);
+                  },
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                ),
+                GestureDetector(
+                  child: Text('Choose from Gallery'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _getImage(picker, ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getImage(ImagePicker picker, ImageSource source) async {
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+
+      try {
+        firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+            .ref()
+            .child('user_photos')
+            .child('${userEmail}_avatar.jpg');
+
+        await ref.putFile(imageFile);
+
+        String downloadURL = await ref.getDownloadURL();
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userEmail)
+            .update({'photoURL': downloadURL});
+      } catch (error) {
+        print('Error uploading image: $error');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -474,11 +539,14 @@ class NavBar extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtuphMb4mq-EcVWhMVT8FCkv5dqZGgvn_QiA&usqp=CAU',
+                      GestureDetector(
+                        onTap: () => _uploadImage(context),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            userData?['photoURL'] ?? 'https://firebasestorage.googleapis.com/v0/b/pharmacy-management-syst-cdbf2.appspot.com/o/2df47b6e-2d22-419e-979c-a2899a5be168.jpeg?alt=media&token=283932e4-414c-44c2-820f-2204fb12b41e',
+                          ),
+                          radius: 40,
                         ),
-                        radius: 30,
                       ),
                       SizedBox(height: 10),
                       Text(
