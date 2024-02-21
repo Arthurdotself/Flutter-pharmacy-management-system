@@ -1,14 +1,19 @@
-# tugas1_login
-Plain Login Page built using Flutter.
+# pharmacy management system
+using Flutter.
 
-Created in order to accomplish Assignment 1 Praktikum Pemrograman Aplikasi Mobile.
+the app is not completed yet...
 
 by:
 ```
-Name  : Habib Al Fauzan
-NIM   : 124200070
-Plug  : C
+Name  : Mustafa ahmed , belal akrem , bervana
+
 ```
+
+Supervised by:
+```
+dr.Alyaa Asaad
+```
+
 
 ## Getting Started
 To run this app, run following command:
@@ -18,4 +23,3 @@ flutter run
 ```
 
 ## Screenshot
-<img src="assets/Screenshot_1663393466.png" height="400em"/>&nbsp;<img src="assets/Screenshot_1663393492.png" height="400em" />
