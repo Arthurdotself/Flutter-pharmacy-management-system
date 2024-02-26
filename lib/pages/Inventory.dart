@@ -3,7 +3,8 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
-
+import 'package:provider/provider.dart';
+import 'package:tugas1_login/backend/user_provider.dart';
 
 class Inventory extends StatefulWidget {
   final String userEmail;
@@ -17,6 +18,7 @@ class Inventory extends StatefulWidget {
 
 String _pharmacyName = '';
 late Timer _timer;
+
 
 class _InventoryState extends State<Inventory> {
   void _fetchAndUpdateMedicines() {

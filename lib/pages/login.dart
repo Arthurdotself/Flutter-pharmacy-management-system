@@ -5,6 +5,9 @@ import 'package:tugas1_login/pages/reset_password.dart';
 import 'package:tugas1_login/pages/signup.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:tugas1_login/pages/home.dart';
+import 'package:provider/provider.dart';
+import 'package:tugas1_login/backend/user_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -100,12 +103,20 @@ class _LoginState extends State<Login> {
                   try {
                     var user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
-
+                     // Fetch pharmacyId from user document
+                        final userDataSnapshot = await FirebaseFirestore.instance
+                           .collection('users')
+                            .doc(email)
+                             .get();
+                           final pharmacyId = userDataSnapshot['pharmacyId'];
+                    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                    userProvider.setUserId(email);
+                    userProvider.setPharmacyId(pharmacyId);
                     // Pass user email to Dashbord widget
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Dashbord(userEmail: email),
+                        builder: (context) => Dashbord(userId: email,PharmacyId: pharmacyId ),
                       ),
                     );
                   } catch (Error) {
