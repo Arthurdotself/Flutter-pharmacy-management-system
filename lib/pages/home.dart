@@ -13,6 +13,7 @@ import 'package:tugas1_login/pages/login.dart';
 import 'package:tugas1_login/main.dart';
 
 import 'notes.dart';
+import 'package:tugas1_login/pages/purchaseInvoices.dart';
 
 class Dashbord extends StatefulWidget {
   final String userId;
@@ -303,7 +304,13 @@ class _DashbordState extends State<Dashbord> {
                               ),
                               const SizedBox(height: 5.0),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => PurchaseInvoices()),
+                                  );
+                                },
+
                                 child: const Text("    More    "),
                               ),
                             ],
@@ -361,14 +368,6 @@ class _DashbordState extends State<Dashbord> {
                       ),
                     );
                   }),
-                ),
-              ),
-              Container(
-                height: 70,
-                margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10), // Adjust the value as needed
                 ),
               ),
               Flexible(
