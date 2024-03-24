@@ -34,7 +34,8 @@ class MyApp extends StatelessWidget {
             if (userId != null && userId.isNotEmpty) {
               return Dashbord(userId: userId , PharmacyId: pharmacyId,);
             } else {
-              return const Login();
+              return Dashbord(userId: "admin@pms.com" , PharmacyId: 'KYFUz7GO7IHV8tsLAYGF',);
+              //return const Login();
             }
           },
         ),
