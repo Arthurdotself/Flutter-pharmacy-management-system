@@ -15,6 +15,7 @@ import 'package:tugas1_login/pages/setting.dart';
 import 'notes.dart';
 import 'package:tugas1_login/pages/purchaseInvoices.dart';
 import 'package:tugas1_login/pages/dashboard.dart';
+import 'package:tugas1_login/pages/expiring&expired.dart';
 
 class Dashbord extends StatefulWidget {
   final String userId;
@@ -341,7 +342,12 @@ class _DashbordState extends State<Dashbord> {
                               ),
                               const SizedBox(height: 5.0),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => ExpiringExpiredPage()),
+                                  );
+                                },
                                 child: const Text("    More    "),
                               ),
                             ],
