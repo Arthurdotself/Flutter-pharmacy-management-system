@@ -113,7 +113,7 @@ class DashboardPage extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  //color: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: _buildBarChart(),
