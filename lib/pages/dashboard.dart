@@ -210,9 +210,9 @@ class DaySales {
 void main() {
   runApp(MaterialApp(
     home: DashboardPage(),
-    theme: ThemeData(
-      scaffoldBackgroundColor: Colors.black, // Change background color here
-    ),
+    // theme: ThemeData(
+    //   scaffoldBackgroundColor: Colors.black, // Change background color here
+    // ),
   ));
 }
 
