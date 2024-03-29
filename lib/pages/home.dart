@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:tugas1_login/pages/login.dart';
 import 'package:tugas1_login/main.dart';
-
+import 'package:tugas1_login/pages/setting.dart';
 import 'notes.dart';
 import 'package:tugas1_login/pages/purchaseInvoices.dart';
 
@@ -634,6 +634,12 @@ class NavBar extends StatelessWidget {
                   title: Text('Settings'),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => SettingsPage(),
+                        ),
+                    );
                   },
                 ),
                 Divider(),
