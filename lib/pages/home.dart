@@ -14,6 +14,7 @@ import 'package:tugas1_login/main.dart';
 
 import 'notes.dart';
 import 'package:tugas1_login/pages/purchaseInvoices.dart';
+import 'package:tugas1_login/pages/dashboard.dart';
 
 class Dashbord extends StatefulWidget {
   final String userId;
@@ -584,6 +585,12 @@ class NavBar extends StatelessWidget {
                   title: Text('Home'),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DashboardPage(),
+                      ),
+                    );
                   },
                 ),
 
