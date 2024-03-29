@@ -29,7 +29,8 @@ class DashboardPage extends StatelessWidget {
                     title: 'Medicines\n',
                     icon: Icons.local_pharmacy,
                     number: 50, // Replace with actual number of medicines
-                    color: Colors.blue, // Customize color
+                    color: Colors.blue.shade50,
+                    iconColor: Colors.blue.shade800,// Customize color
                     onTap: () {
                       // Add functionality for the Medicines container
                     },
@@ -39,9 +40,10 @@ class DashboardPage extends StatelessWidget {
                 Expanded(
                   child: _buildDashboardItem(
                     title: 'Add\nSells',
-                    icon: Icons.attach_money,
+                    icon: Icons.monetization_on,
                     number: 100, // Replace with actual number of sells
-                    color: Colors.blue, // Customize color
+                    color: Colors.blue.shade50,
+                    iconColor: Colors.green.shade700,// Customize color
                     onTap: () {
                       // Add functionality for the Sells container
                     },
@@ -53,7 +55,8 @@ class DashboardPage extends StatelessWidget {
                     title: 'Expiring & Expired',
                     icon: Icons.timer,
                     number: 20, // Replace with actual number of expiring/expired
-                    color: Colors.blue, // Customize color
+                    color: Colors.blue.shade50,
+                    iconColor: Colors.orange.shade800,// Customize color
                     onTap: () {
                       // Add functionality for the Expiring & Expired container
                     },
@@ -71,7 +74,8 @@ class DashboardPage extends StatelessWidget {
                   child: _buildDashboardItem(
                     title: 'Patient Profile',
                     icon: Icons.account_circle,
-                    color: Colors.green, // Customize color
+                    color: Colors.blue.shade50,
+                    iconColor: Colors.teal.shade500,// Customize color
                     onTap: () {
                       // Add functionality for the Patient Profile container
                     },
@@ -84,7 +88,8 @@ class DashboardPage extends StatelessWidget {
                     title: 'Tasks',
                     icon: Icons.assignment,
                     number: 5, // Replace with actual number of tasks
-                    color: Colors.green, // Customize color
+                    color: Colors.blue.shade50,
+                    iconColor: Colors.yellow.shade700, // Customize color
                     onTap: () {
                       // Add functionality for the Tasks container
                     },
@@ -108,7 +113,7 @@ class DashboardPage extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: _buildBarChart(),
@@ -124,7 +129,8 @@ class DashboardPage extends StatelessWidget {
     required String title,
     required IconData icon,
     int? number,
-    required Color color,
+    required Color color, // Color for the container background
+    required Color iconColor, // Color for the icon
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -141,14 +147,14 @@ class DashboardPage extends StatelessWidget {
             Icon(
               icon,
               size: 50.0,
-              color: Colors.white,
+              color: iconColor, // Set icon color
             ),
             SizedBox(height: 10.0),
             Text(
               title,
               style: TextStyle(
                 fontSize: 16.0, // Adjust font size as needed
-                color: Colors.white, // Adjust text color as needed
+                color: Colors.black, // Adjust text color as needed
               ),
             ),
             SizedBox(height: 5.0),
@@ -156,7 +162,7 @@ class DashboardPage extends StatelessWidget {
               number != null ? '$number' : '',
               style: TextStyle(
                 fontSize: 16.0, // Adjust font size as needed
-                color: Colors.white, // Adjust text color as needed
+                color: Colors.black, // Adjust text color as needed
               ),
             ),
           ],
@@ -164,6 +170,7 @@ class DashboardPage extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildBarChart() {
     // Replace this data with your actual sells data
@@ -203,6 +210,9 @@ class DaySales {
 void main() {
   runApp(MaterialApp(
     home: DashboardPage(),
+    theme: ThemeData(
+      scaffoldBackgroundColor: Colors.black, // Change background color here
+    ),
   ));
 }
 
