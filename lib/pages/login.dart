@@ -44,8 +44,10 @@ class _LoginState extends State<Login> {
         appBar: AppBar(
           title: const Text('Login Screen'),
         ),
-       // body: _user != null ? _userInfo() : _loginForm(),
-        body: _loginForm(),
+      //  body: _user != null ? _userInfo() : _loginForm(),
+       body: SingleChildScrollView(
+       child:  _loginForm(),
+        ),
       ),
     );
   }
