@@ -594,7 +594,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardPage(),
+                        builder: (context) => DashboardPage( userId: userId, PharmacyId: 'KYFUz7GO7IHV8tsLAYGF',),
                       ),
                     );
                   },
@@ -608,7 +608,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Inventory(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF'),
+                        builder: (context) => Inventory(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF' ),
                       ),
                     );
                   },
