@@ -18,6 +18,7 @@ import 'notes.dart';
 import 'package:tugas1_login/pages/purchaseInvoices.dart';
 import 'package:tugas1_login/pages/dashboard.dart';
 import 'package:tugas1_login/pages/expiring&expired.dart';
+import 'package:tugas1_login/pages/tasks.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -210,7 +211,10 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Colors.blue.shade50,
                     iconColor: Colors.yellow.shade700, // Customize color
                     onTap: () {
-                      // Add functionality for the Tasks container
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TasksPage()),
+                      );
                     },
                   ),
                 ),
