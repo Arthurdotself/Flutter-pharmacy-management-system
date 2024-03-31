@@ -19,6 +19,7 @@ import 'package:tugas1_login/pages/purchaseInvoices.dart';
 import 'package:tugas1_login/pages/dashboard.dart';
 import 'package:tugas1_login/pages/expiring&expired.dart';
 import 'package:tugas1_login/pages/tasks.dart';
+import 'package:tugas1_login/pages/test.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -46,6 +47,28 @@ class _DashboardPageState extends State<DashboardPage> {
     _medicinesCountFuture = getMedicinesCount();
     fetchSalesData();
   }
+  Future<int> countTasks(BuildContext context) async {
+    try {
+      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+      String userId = userProvider.userId;
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').get();
+
+      int totalTasks = querySnapshot.size;
+      int completedTasks = querySnapshot.docs.where((doc) => doc['isCompleted'] == true).length;
+      int pendingTasks = totalTasks - completedTasks;
+
+      print('Total tasks: $totalTasks');
+      print('Completed tasks: $completedTasks');
+      print('Pending tasks: $pendingTasks');
+
+      return totalTasks; // Return the total number of tasks
+    } catch (error) {
+      print('Error counting tasks: $error');
+      return 0; // Return 0 in case of an error
+    }
+  }
+
+
   Future<int> getExpiringCount() async {
     // Get today's date
     DateTime now = DateTime.now();
@@ -176,7 +199,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         color: Colors.blue.shade50,
                         iconColor: Colors.orange.shade800,
                         onTap: () {
-                          // Add functionality for the Expiring & Expired container
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => TestNewThingsPage()),
+                          );
                         },
                       );
                     },
@@ -197,24 +223,36 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Colors.blue.shade50,
                     iconColor: Colors.teal.shade500,// Customize color
                     onTap: () {
-                      // Add functionality for the Patient Profile container
+
                     },
                   ),
                 ),
                 SizedBox(width: 10.0),
                 Expanded(
                   flex: 1,
-                  child: _buildDashboardItem(
-                    title: 'Tasks',
-                    icon: Icons.assignment,
-                    number: 5, // Replace with actual number of tasks
-                    color: Colors.blue.shade50,
-                    iconColor: Colors.yellow.shade700, // Customize color
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => TasksPage()),
-                      );
+                  child: FutureBuilder<int>(
+                    future: countTasks(context), // Use the countTasks method to fetch the count
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text("Error: ${snapshot.error}");
+                      } else {
+                        int? tasksCount = snapshot.data; // Get the tasks count from the snapshot
+                        return _buildDashboardItem(
+                          title: 'Tasks',
+                          icon: Icons.assignment,
+                          number: tasksCount, // Use the tasks count
+                          color: Colors.blue.shade50,
+                          iconColor: Colors.yellow.shade700, // Customize color
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TasksPage()),
+                            );
+                          },
+                        );
+                      }
                     },
                   ),
                 ),

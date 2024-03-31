@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../backend/user_provider.dart';
 
 class TasksPage extends StatelessWidget {
   @override
@@ -12,30 +16,35 @@ class TasksPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TaskItem(
-              task: Task(
-                description: 'Task 1: Complete project proposal',
-                isCompleted: false,
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TaskItem(
-              task: Task(
-                description: 'Task 2: Review design mockups',
-                isCompleted: true,
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TaskItem(
-              task: Task(
-                description: 'Task 3: Implement login screen',
-                isCompleted: false,
-              ),
+            StreamBuilder(
+              stream: _getTasksStream(context),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<TaskItem> taskItems = snapshot.data!.docs.map((doc) {
+                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                    return TaskItem(
+                      task: Task(
+                        documentId: doc.id,
+                        description: data['description'],
+                        isCompleted: data['isCompleted'],
+                      ),
+                    );
+                  }).toList();
+
+                  return Column(
+                    children: taskItems,
+                  );
+                }
+              },
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                // Add functionality to create new tasks
+                createTaskDocument(context);
               },
               child: Text('Create New Task'),
             ),
@@ -44,13 +53,38 @@ class TasksPage extends StatelessWidget {
       ),
     );
   }
-}
 
+  Stream<QuerySnapshot> _getTasksStream(BuildContext context) {
+    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+    String userId = userProvider.userId;
+    return FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').snapshots();
+  }
+
+  Future<void> createTaskDocument(BuildContext context) async {
+    try {
+      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+      String userId = userProvider.userId;
+      CollectionReference tasksCollection = FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks');
+      await tasksCollection.add({
+        'description': 'New Task',
+        'isCompleted': false,
+        'created_at': DateTime.now(),
+      });
+      print('Task document added successfully');
+    } catch (error) {
+      print('Error adding task document: $error');
+    }
+  }
+
+
+}
 class Task {
+  final String documentId; // Add this property to store the document ID
   final String description;
   final bool isCompleted;
 
   Task({
+    required this.documentId,
     required this.description,
     required this.isCompleted,
   });
@@ -73,7 +107,7 @@ class TaskItem extends StatelessWidget {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3), // changes position of shadow
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -96,11 +130,28 @@ class TaskItem extends StatelessWidget {
               color: task.isCompleted ? Colors.green : Colors.grey,
             ),
             onPressed: () {
-              // Add functionality to toggle task completion
+              toggleTaskCompletion(context, task ); // Call function to toggle task completion
             },
           ),
         ],
       ),
     );
+  }
+
+  void toggleTaskCompletion(BuildContext context, Task task) async {
+    try {
+      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+      String userId = userProvider.userId;
+      CollectionReference tasksCollection = FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks');
+
+      // Update the task document in Firestore
+      await tasksCollection.doc(task.documentId).update({
+        'isCompleted': !task.isCompleted,
+      });
+
+      print('Task completion status updated successfully');
+    } catch (error) {
+      print('Error updating task completion status: $error');
+    }
   }
 }

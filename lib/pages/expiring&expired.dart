@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../backend/user_provider.dart';
+import 'package:intl/intl.dart';
 
 class ExpiringExpiredPage extends StatelessWidget {
   @override
@@ -23,19 +27,47 @@ class _ExpiringExpiredListState extends State<ExpiringExpiredList> {
   @override
   void initState() {
     super.initState();
-    // Example data, replace with your actual data
-    _items = [
-      ExpiringExpiredItem(
-        name: 'Item 1',
-        quantity: 10,
-        expiringDate: DateTime.now().add(Duration(days: 25)),
-      ),
-      ExpiringExpiredItem(
-        name: 'Item 2',
-        quantity: 5,
-        expiringDate: DateTime.now().subtract(Duration(days: 5)),
-      ),
-    ];
+    // Call the function to get expiring items from Firebase Firestore
+    _fetchExpiringItems();
+  }
+
+  Future<void> _fetchExpiringItems() async {
+    try {
+      Timestamp timestamp = Timestamp.now();
+      DateTime dateTime = timestamp.toDate();
+      String formattedDateTime = DateFormat.yMMMMd().add_jms().add_E().format(dateTime);
+      // Specify the pharmacyId you want to retrieve expiring items for
+      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+      String pharmacyId = userProvider.PharmacyId;
+      // Query the Firestore collection group for expiring items
+      QuerySnapshot expiringItemsSnapshot = await FirebaseFirestore.instance
+          .collection('pharmacies')
+          .doc(pharmacyId)
+          .collection('medicines')
+          .get();
+
+      expiringItemsSnapshot.docs.forEach((doc) {
+        print(doc.data());
+      });
+
+
+      // Convert the retrieved documents into ExpiringExpiredItem objects
+      List<ExpiringExpiredItem> items = expiringItemsSnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return ExpiringExpiredItem(
+          name: data['name'],
+          quantity: data['Brand'],
+          expiringDate: (data['expire'] as Timestamp).toDate(),
+        );
+      }).toList();
+
+      // Update the state with the retrieved items
+      setState(() {
+        _items = items;
+      });
+    } catch (error) {
+      print('Error fetching expiring items: $error');
+    }
   }
 
   @override
@@ -60,6 +92,7 @@ class ExpiringExpiredItem {
     required this.expiringDate,
   });
 }
+
 
 class ExpiringExpiredListItem extends StatelessWidget {
   final ExpiringExpiredItem item;
@@ -120,4 +153,3 @@ class ExpiringExpiredListItem extends StatelessWidget {
     );
   }
 }
-
