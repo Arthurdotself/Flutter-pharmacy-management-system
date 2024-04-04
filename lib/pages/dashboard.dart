@@ -154,7 +154,15 @@ class _DashboardPageState extends State<DashboardPage> {
                           color: Colors.blue.shade50,
                           iconColor: Colors.blue.shade800,
                           onTap: () {
-                            // Add functionality for the Medicines container
+                            UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                            String userId = userProvider.userId;
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Inventory(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF' ),
+                              ),
+                            );
                           },
                         );
                       }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart'; // Import your UserProvider class
 import 'firebase_options.dart';
 import 'package:tugas1_login/pages/login.dart';
+import 'package:tugas1_login/pages/dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
             String? userId = userProvider.userId;
             String? pharmacyId = userProvider.PharmacyId;
             if (userId != null && userId.isNotEmpty) {
-              return Dashbord(userId: userId , PharmacyId: pharmacyId,);
+              return DashboardPage(userId: userId , PharmacyId: pharmacyId,);
             } else {
               return const Login();
             }
