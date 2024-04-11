@@ -1,6 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:tugas1_login/pages/profile.dart';
 
+class LanguageSelectionPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Select Language'),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text('English'),
+            onTap: () {
+              // Set selected language to English
+              // You can implement language selection logic here
+              Navigator.pop(context); // Close language selection page
+            },
+          ),
+          ListTile(
+            title: Text('Spanish'),
+            onTap: () {
+              // Set selected language to Spanish
+              // You can implement language selection logic here
+              Navigator.pop(context); // Close language selection page
+            },
+          ),
+          ListTile(
+            title: Text('Kurdish'),
+            onTap: () {
+              // Set selected language to Spanish
+              // You can implement language selection logic here
+              Navigator.pop(context); // Close language selection page
+            },
+          ),
+          ListTile(
+            title: Text('Japanese'),
+            onTap: () {
+              // Set selected language to Spanish
+              // You can implement language selection logic here
+              Navigator.pop(context); // Close language selection page
+            },
+          ),
+          // Add more languages as needed
+        ],
+      ),
+    );
+  }
+}
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -30,7 +77,10 @@ class SettingsPage extends StatelessWidget {
           _buildDivider(),
           _buildHeader('App Settings'),
           _buildListItem(Icons.language, 'Language', () {
-            // Navigate to language selection page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LanguageSelectionPage()), // Navigate to LanguageSelectionPage
+            );
           }),
           _buildDivider(),
           _buildHeader('Support'),
