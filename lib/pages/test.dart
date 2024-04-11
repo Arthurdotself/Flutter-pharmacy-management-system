@@ -87,7 +87,7 @@ class ExpiredMedicineListItem extends StatelessWidget {
       expiryDates.add(expiryDate);
     }
 
-    Color indicatorColor = Colors.blue.shade50; // Default color
+    Color indicatorColor = Colors.green; // Default color
     DateTime earliestExpiryDate = expiryDates.reduce((a, b) => a.isBefore(b) ? a : b);
     Duration timeDifference = earliestExpiryDate.difference(DateTime.now());
     if (timeDifference.inDays <= 30 && timeDifference.inDays >= 0) {

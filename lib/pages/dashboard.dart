@@ -61,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
       print('Completed tasks: $completedTasks');
       print('Pending tasks: $pendingTasks');
 
-      return totalTasks; // Return the total number of tasks
+      return pendingTasks; // Return the total number of tasks
     } catch (error) {
       print('Error counting tasks: $error');
       return 0; // Return 0 in case of an error
@@ -203,7 +203,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       return _buildDashboardItem(
                         title: 'Expiring & Expired',
                         icon: Icons.timer,
-                        number: snapshot.connectionState == ConnectionState.done ? snapshot.data ?? 0 : null,
+                       // number: snapshot.connectionState == ConnectionState.done ? snapshot.data ?? 0 : null,
                         color: Colors.blue.shade50,
                         iconColor: Colors.orange.shade800,
                         onTap: () {
