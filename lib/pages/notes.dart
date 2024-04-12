@@ -1,209 +1,297 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
 
-class NotesPage extends StatefulWidget {
-  const NotesPage({Key? key}) : super(key: key);
-
-  @override
-  _NotesPageState createState() => _NotesPageState();
+void main() {
+  runApp(NotesPage());
 }
 
-class _NotesPageState extends State<NotesPage> {
-  List<Note> notes = [];
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
+class NotesPage extends StatelessWidget {
   @override
-  void initState() {
-    super.initState();
-    _initializeNotifications();
-  }
-
-  Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> _showAddNoteDialog({int? index, Note? initialNote}) async {
-    final TextEditingController textController = TextEditingController(text: initialNote?.text);
-    bool enableNotification = false;
-    DateTime? selectedDateTime;
-
-    if (initialNote != null && initialNote.notificationDateTime != null) {
-      selectedDateTime = initialNote.notificationDateTime;
-      enableNotification = true;
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(index != null ? 'Edit Note' : 'Add Note'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: textController,
-                onChanged: (value) {
-                  textController.text = value;
-                },
-                decoration: const InputDecoration(hintText: 'Enter your note here'),
-              ),
-              CheckboxListTile(
-                title: const Text('Enable Notification'),
-                value: enableNotification,
-                onChanged: (value) {
-                  setState(() {
-                    enableNotification = value!;
-                  });
-                },
-              ),
-              if (enableNotification) ...[
-                TextButton(
-                  onPressed: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      final TimeOfDay? timePicked = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (timePicked != null) {
-                        setState(() {
-                          selectedDateTime = DateTime(picked.year, picked.month, picked.day, timePicked.hour, timePicked.minute);
-                        });
-                      }
-                    }
-                  },
-                  child: Text(selectedDateTime != null ? 'Change Notification Time' : 'Set Notification Time'),
-                ),
-                if (selectedDateTime != null) Text('Notification Time: ${selectedDateTime.toString()}'),
-              ],
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                final trimmedText = textController.text.trim();
-                if (trimmedText.isNotEmpty) {
-                  setState(() {
-                    if (index != null) {
-                      notes[index].text = trimmedText;
-                      notes[index].notificationDateTime = selectedDateTime;
-                    } else {
-                      notes.add(Note(
-                        text: trimmedText,
-                        notificationDateTime: selectedDateTime,
-                      ));
-                    }
-                  });
-                  if (enableNotification && selectedDateTime != null) {
-                    _scheduleNotification(index ?? notes.length - 1, textController.text, selectedDateTime!);
-                  }
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Note cannot be empty or contain only spaces!'),
-                    ),
-                  );
-                }
-              },
-              child: Text(index != null ? 'Save' : 'Add'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Samsung Notes',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: NotesHomePage(),
     );
   }
+}
 
-  Future<void> _scheduleNotification(int id, String text, DateTime dateTime) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails('your channel id', 'your channel name', 'your channel description');
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      'Note Notification',
-      text,
-      tz.TZDateTime.from(dateTime, tz.local),
-      platformChannelSpecifics,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    );
-  }
+class NotesHomePage extends StatefulWidget {
+  @override
+  _NotesHomePageState createState() => _NotesHomePageState();
+}
 
-  void _deleteNote(int index) {
-    setState(() {
-      notes.removeAt(index);
-    });
-  }
+class _NotesHomePageState extends State<NotesHomePage> {
+  List<Note> _notes = [
+
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notes'),
+        title: Text('Notes'),
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: notes.length * 2 + 1, // Corrected item count
-        itemBuilder: (BuildContext context, int index) {
-          if (index.isOdd) {
-            // Separator
-            return const Divider();
-          }
-          final noteIndex = index ~/ 2;
-          if (noteIndex >= notes.length) {
-            // Handle out-of-range index
-            return const SizedBox.shrink(); // Return an empty widget
-          }
-          return ListTile(
-            title: Text(notes[noteIndex].text),
+        itemCount: _notes.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
             onTap: () {
-              _showAddNoteDialog(index: noteIndex, initialNote: notes[noteIndex]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NoteDetailPage(note: _notes[index]),
+                ),
+              );
             },
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () {
-                _deleteNote(noteIndex);
-              },
-            ),
+            child: NoteCard(note: _notes[index]),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddNoteDialog();
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final newNote = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditNotePage(),
+            ),
+          );
+          if (newNote != null) {
+            setState(() {
+              _notes.add(newNote);
+            });
+          }
         },
-        child: const Icon(Icons.add),
+        label: Text('Add Note'),
+        icon: Icon(Icons.note_add),
+        backgroundColor: Colors.blue.shade50,
       ),
     );
   }
 }
 
 class Note {
-  String text;
-  DateTime? notificationDateTime;
+  final String id;
+  final String title;
+  final String content;
+  final String category;
 
   Note({
-    required this.text,
-    this.notificationDateTime,
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.category,
   });
 }
 
-void main() {
-  runApp(const MaterialApp(
-    home: NotesPage(),
-  ));
+class NoteCard extends StatelessWidget {
+  final Note note;
+
+  const NoteCard({Key? key, required this.note}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(8),
+      child: ListTile(
+        title: Text(
+          note.title,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          _trimContent(note.content),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        ),
+        trailing: Text(note.category),
+      ),
+    );
+  }
+
+  String _trimContent(String content) {
+    if (content.length > 50) {
+      return content.substring(0, 50) + '...'; // Trim content to 50 characters
+    } else {
+      return content;
+    }
+  }
+}
+
+class NoteDetailPage extends StatelessWidget {
+  final Note note;
+
+  const NoteDetailPage({Key? key, required this.note}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(note.title),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit_note),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddEditNotePage(
+                    note: note,
+                  ),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              // Implement delete functionality
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Delete Note'),
+                    content: Text('Are you sure you want to delete this note?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pop(context, note.id);
+                        },
+                        child: Text('Delete'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Category: ${note.category}',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(note.content),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AddEditNotePage extends StatefulWidget {
+  final Note? note;
+
+  const AddEditNotePage({Key? key, this.note}) : super(key: key);
+
+  @override
+  _AddEditNotePageState createState() => _AddEditNotePageState();
+}
+
+class _AddEditNotePageState extends State<AddEditNotePage> {
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _contentController = TextEditingController();
+  TextEditingController _categoryController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.note != null) {
+      _titleController.text = widget.note!.title;
+      _contentController.text = widget.note!.content;
+      _categoryController.text = widget.note!.category;
+    } else {
+      _titleController.text = 'New Note';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.note == null ? 'Add Note' : 'Edit Note'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: 'Title',
+              ),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _contentController,
+              decoration: InputDecoration(
+                labelText: 'Content',
+              ),
+              maxLines: 3,
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _categoryController,
+              decoration: InputDecoration(
+                labelText: 'Category',
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                final title = _titleController.text.trim();
+                final content = _contentController.text.trim();
+                if (title.isNotEmpty && content.isNotEmpty) {
+                  final newNote = Note(
+                    id: widget.note?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                    title: title,
+                    content: content,
+                    category: _categoryController.text,
+                  );
+                  Navigator.pop(context, newNote);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Error'),
+                        content: Text('Title and content cannot be empty.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
