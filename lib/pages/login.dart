@@ -8,6 +8,7 @@ import 'package:tugas1_login/pages/home.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tugas1_login/pages/dashboard.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -118,7 +119,7 @@ class _LoginState extends State<Login> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Dashbord(userId: email,PharmacyId: pharmacyId ),
+                        builder: (context) => DashboardPage(userId: email,PharmacyId: pharmacyId ),
                       ),
                     );
                   } catch (Error) {
