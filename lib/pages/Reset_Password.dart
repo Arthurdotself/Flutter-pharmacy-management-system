@@ -22,6 +22,7 @@ class _Reset_PasswordState extends State<Reset_Password> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Password Reset'),
@@ -32,9 +33,11 @@ class _Reset_PasswordState extends State<Reset_Password> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 70),
-                child: const FlutterLogo(
-                  size: 40,
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Image.asset(
+                  'assets/pharmassist11.png',
+                  width: 100,
+                  height: 100,
                 ),
               ),
               Container(

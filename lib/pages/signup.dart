@@ -25,6 +25,7 @@ class _SignupState extends State<Signup> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('SignUp Screen'),
@@ -35,9 +36,11 @@ class _SignupState extends State<Signup> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 70),
-                child: const FlutterLogo(
-                  size: 40,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                child: Image.asset(
+                  'assets/pharmassist11.png',
+                  width: 100,
+                  height: 100,
                 ),
               ),
               Container(
