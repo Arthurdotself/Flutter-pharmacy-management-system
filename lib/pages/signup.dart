@@ -36,7 +36,7 @@ class _SignupState extends State<Signup> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 50),
                 child: Image.asset(
                   'assets/pharmassist11.png',
                   width: 100,

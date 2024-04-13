@@ -30,10 +30,10 @@ class _Reset_PasswordState extends State<Reset_Password> {
         body: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 80, 20, 50),
                 child: Image.asset(
                   'assets/pharmassist11.png',
                   width: 100,
