@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../backend/user_provider.dart';
@@ -56,55 +56,55 @@ class _TasksPageState extends State<TasksPage> with SingleTickerProviderStateMix
   }
 }
 
-
 class UnfinishedTasksPage extends StatelessWidget {
   const UnfinishedTasksPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          StreamBuilder(
-            stream: _getTasksStream(context),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                List<Widget> taskItems = snapshot.data!.docs.map((doc) {
-                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: TaskItem(
-                      task: Task(
-                        documentId: doc.id,
-                        isCompleted: data['isCompleted'],
-                        title: data['title'],
-                        description: data['description'],
-
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StreamBuilder(
+              stream: _getTasksStream(context),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<Widget> taskItems = snapshot.data!.docs.map((doc) {
+                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: TaskItem(
+                        task: Task(
+                          documentId: doc.id,
+                          isCompleted: data['isCompleted'],
+                          title: data['title'],
+                          description: data['description'],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList();
+                    );
+                  }).toList();
 
-                return Column(
-                  children: taskItems,
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: () {
-              createTaskDocument(context);
-            },
-            child: const Text('Create New Task'),
-          ),
-        ],
+                  return Column(
+                    children: taskItems,
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                createTaskDocument(context);
+              },
+              child: const Text('Create New Task'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -174,7 +174,6 @@ class UnfinishedTasksPage extends StatelessWidget {
       },
     );
   }
-
 }
 
 class CompletedTasksPage extends StatelessWidget {
@@ -182,41 +181,43 @@ class CompletedTasksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          StreamBuilder(
-            stream: _getCompletedTasksStream(context),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                List<Widget> taskItems = snapshot.data!.docs.map((doc) {
-                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: TaskItem(
-                      task: Task(
-                        documentId: doc.id,
-                        isCompleted: data['isCompleted'],
-                        title: data['title'],
-                        description: data['description'],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StreamBuilder(
+              stream: _getCompletedTasksStream(context),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<Widget> taskItems = snapshot.data!.docs.map((doc) {
+                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: TaskItem(
+                        task: Task(
+                          documentId: doc.id,
+                          isCompleted: data['isCompleted'],
+                          title: data['title'],
+                          description: data['description'],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList();
+                    );
+                  }).toList();
 
-                return Column(
-                  children: taskItems,
-                );
-              }
-            },
-          ),
-        ],
+                  return Column(
+                    children: taskItems,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -227,7 +228,6 @@ class CompletedTasksPage extends StatelessWidget {
     return FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').where('isCompleted', isEqualTo: true).snapshots();
   }
 }
-
 
 class Task {
   final String documentId; // Add this property to store the document ID

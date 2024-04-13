@@ -257,7 +257,7 @@ class SettingsPage extends StatelessWidget {
               context: context,
               applicationName: 'PharmAssist',
               applicationVersion: '1.0.0', // Your app version
-              applicationLegalese: '© 2022 Cihan University\n', // Your company name or legal information
+              applicationLegalese: '© 2024 Cihan University\n', // Your company name or legal information
               children: [
                 // Additional information about your app
                 Text('Introducing our cutting-edge Pharmacy Management System, the ultimate solution for pharmacists and pharmacy owners to streamline their operations and enhance efficiency. Our app revolutionizes the way pharmacies manage inventory, sales, and daily tasks, making every aspect of pharmacy management a breeze.'
