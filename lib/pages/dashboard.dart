@@ -20,7 +20,7 @@ import 'package:tugas1_login/pages/dashboard.dart';
 import 'package:tugas1_login/pages/expiring&expired.dart';
 import 'package:tugas1_login/pages/tasks.dart';
 import 'package:tugas1_login/pages/test.dart';
-
+import 'package:tugas1_login/pages/patientProfile.dart';
 
 class DashboardPage extends StatefulWidget {
   final String userId;
@@ -231,7 +231,10 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Colors.blue.shade50,
                     iconColor: Colors.teal.shade500,// Customize color
                     onTap: () {
-
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => PatientProfilePage()),
+                      );
                     },
                   ),
                 ),
