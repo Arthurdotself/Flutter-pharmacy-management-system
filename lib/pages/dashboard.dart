@@ -571,6 +571,20 @@ class NavBar extends StatelessWidget {
                   },
                 ),
 
+                // ListTile(
+                //   leading: Icon(Icons.receipt_long),
+                //   title: Text('Purchase Invoices'),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => PurchaseInvoices(),
+                //       ),
+                //     );
+                //   },
+                // ),
+
                 ListTile(
                   leading: Icon(Icons.note_outlined),
                   title: Text('Notes'),
