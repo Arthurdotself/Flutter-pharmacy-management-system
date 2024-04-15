@@ -14,6 +14,7 @@ class Sells extends StatefulWidget {
 class _SellsState extends State<Sells> {
   String _selectedTimePeriod = 'Today';
   late Future<List<Map<String, dynamic>>> _sellsDataFuture;
+  List<dynamic> shipments = []; // Declare shipments list at class level
 
   @override
   void initState() {
@@ -21,9 +22,9 @@ class _SellsState extends State<Sells> {
     _sellsDataFuture = fetchSellsData();
   }
 
-  Future<List<Map<String, dynamic>>> fetchSellsData() async {
-    String currentDate = DateTime.now().toString().substring(0, 10);
-    String selectedDate = _selectedTimePeriod == 'Today' ? currentDate : ''; // You might need to handle other time periods accordingly
+  Future<List<Map<String, dynamic>>> fetchSellsData({String? selectedDate}) async {
+    selectedDate ??= DateTime.now().toString().substring(0, 10); // Use current date if no date is provided
+
     try {
       // Fetch pharmacyId from user document
       final userDataSnapshot = await FirebaseFirestore.instance
@@ -33,26 +34,60 @@ class _SellsState extends State<Sells> {
       final pharmacyId = userDataSnapshot['pharmacyId'];
       print('Pharmacy ID: $pharmacyId');
 
-      DocumentSnapshot sellsDocSnapshot = await FirebaseFirestore.instance
-          .collection('pharmacies')
-          .doc(pharmacyId)
-          .collection('sells')
-          .doc(selectedDate) // Get the document directly by document ID (selectedDate)
-          .get();
+      // If selectedDate is '0', retrieve all sells
+      if (selectedDate == '0') {
+        QuerySnapshot sellsQuerySnapshot = await FirebaseFirestore.instance
+            .collection('pharmacies')
+            .doc(pharmacyId)
+            .collection('sells')
+            .get();
 
-      if (sellsDocSnapshot.exists) {
-        Map<String, dynamic> sellsData = sellsDocSnapshot.data() as Map<String, dynamic>;
-        print('Sells data fetched: $sellsData');
-        return [sellsData]; // Return a list with the fetched sells data
+        List<Map<String, dynamic>> allSellsData = [];
+        for (QueryDocumentSnapshot doc in sellsQuerySnapshot.docs) {
+          QuerySnapshot dailySellsQuerySnapshot = await doc.reference.collection('dailySells').get();
+          dailySellsQuerySnapshot.docs.forEach((dailyDoc) {
+            allSellsData.add(dailyDoc.data() as Map<String, dynamic>);
+          });
+        }
+
+        if (allSellsData.isNotEmpty) {
+          print('All sells data fetched: $allSellsData');
+          return allSellsData;
+        } else {
+          print('No sells data found');
+          return [];
+        }
       } else {
-        print('No sells data found for date: $selectedDate');
-        return []; // Return an empty list if no sells data is found
+        // Retrieve sells data for the specified date
+        QuerySnapshot dailySellsQuerySnapshot = await FirebaseFirestore.instance
+            .collection('pharmacies')
+            .doc(pharmacyId)
+            .collection('sells')
+            .doc(selectedDate)
+            .collection('dailySells')
+            .get();
+
+        List<Map<String, dynamic>> sellsData = [];
+        dailySellsQuerySnapshot.docs.forEach((doc) {
+          sellsData.add(doc.data() as Map<String, dynamic>);
+        });
+
+        if (sellsData.isNotEmpty) {
+          print('Sells data fetched for date $selectedDate: $sellsData');
+          return sellsData;
+        } else {
+          print('No sells data found for date: $selectedDate');
+          return [];
+        }
       }
     } catch (error) {
       print("Error fetching sells data: $error");
       return [];
     }
   }
+
+
+
 
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -81,6 +116,8 @@ class _SellsState extends State<Sells> {
     double price = 0.0;
     int quantity = 0;
     String selectedExpirationDate = '';
+    List<String> expirationDates = [
+    ]; // List to hold available expiration dates
 
     try {
       final docRef = FirebaseFirestore.instance
@@ -94,14 +131,42 @@ class _SellsState extends State<Sells> {
       if (docSnapshot.exists) {
         final data = docSnapshot.data() as Map<String, dynamic>;
         productName = data['Name'] ?? '';
-        price = data['price'] != null ? double.parse(data['price'].toString()) : 0.0;
-        quantity = data['quantity'] != null ? int.parse(data['quantity'].toString()) : 0;
+        quantity = data['quantity'] ?? 0;
 
-        // Now we need to retrieve the expiration dates from the shipments array
-        List<dynamic> shipments = data['shipments'] ?? [];
+        // Assign value to shipments
+        shipments = data['shipments'] ?? []; // Assign the value here
+
         if (shipments.isNotEmpty) {
-          // For simplicity, let's just use the first expiration date from the shipments array
-          selectedExpirationDate = shipments[0]['expire'] ?? '';
+          // Populate expirationDates list with available expiration dates
+          expirationDates = shipments.map((shipment) {
+            Timestamp expireTimestamp = shipment['expire'];
+            return expireTimestamp.toDate().toString();
+          }).toList();
+
+          // Sort expiration dates in ascending order
+          expirationDates.sort((a, b) =>
+              DateTime.parse(a).compareTo(DateTime.parse(b)));
+
+          // Find the closest expiration date that is not expired
+          final currentDate = DateTime.now();
+          for (final date in expirationDates) {
+            final expirationDate = DateTime.parse(date);
+            if (expirationDate.isAfter(currentDate)) {
+              selectedExpirationDate = date;
+              // Find the shipment data corresponding to the selected expiration date
+              for (final shipment in shipments) {
+                Timestamp expireTimestamp = shipment['expire'];
+                String expireDate = expireTimestamp.toDate().toString();
+                if (expireDate == selectedExpirationDate) {
+                  // Populate the price from the shipment data
+                  price = shipment['price'] != null ? double.parse(
+                      shipment['price'].toString()) : 0.0;
+                  break;
+                }
+              }
+              break;
+            }
+          }
         }
       }
     } catch (error) {
@@ -111,62 +176,86 @@ class _SellsState extends State<Sells> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Add Sell"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: (value) {
-                    productName = value;
-                  },
-                  decoration: const InputDecoration(labelText: 'Product Name'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Add Sell"),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Product Name Field
+                    Text(selectedExpirationDate.isNotEmpty
+                        ? 'Product Name: $productName'
+                        : 'No product name available'),
+
+                    // Price Field
+                    Text(selectedExpirationDate.isNotEmpty
+                        ? 'Price: $price'
+                        : 'No price available'),
+
+                    // Expiration Date Dropdown
+                    DropdownButtonFormField<String>(
+                      value: selectedExpirationDate,
+                      decoration: const InputDecoration(
+                          labelText: 'Expiration Date'),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedExpirationDate = value!;
+                          // Update the price when the expiration date changes
+                          for (final shipment in shipments) {
+                            Timestamp expireTimestamp = shipment['expire'];
+                            String expireDate = expireTimestamp.toDate()
+                                .toString();
+                            if (expireDate == selectedExpirationDate) {
+                              // Populate the price from the shipment data
+                              price = shipment['price'] != null ? double.parse(
+                                  shipment['price'].toString()) : 0.0;
+                              break;
+                            }
+                          }
+                        });
+                      },
+                      items: expirationDates.map((date) {
+                        return DropdownMenuItem(
+                          value: date,
+                          child: Text(date),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
-                TextField(
-                  onChanged: (value) {
-                    price = double.parse(value);
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
+                  child: const Text("Cancel"),
                 ),
-                TextField(
-                  onChanged: (value) {
-                    quantity = int.parse(value);
+                TextButton(
+                  onPressed: () {
+                    // Perform add sell operation here
+                    _addSell(scannedBarcode, productName, price, quantity,
+                        selectedExpirationDate);
+                    Navigator.of(context).pop();
                   },
-                  decoration: const InputDecoration(labelText: 'Quantity'),
-                  keyboardType: TextInputType.number,
+                  child: const Text("Save"),
                 ),
-                // Optionally, you can display the selected expiration date or provide a dropdown to choose from the available expiration dates
-                Text(selectedExpirationDate.isNotEmpty ? 'Selected Expiration Date: $selectedExpirationDate' : 'No expiration date selected'),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                // Perform add sell operation here
-                _addSell(scannedBarcode, productName, price, quantity, selectedExpirationDate);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Save"),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
 
-
-  void _addSell(String scannedBarcode, String productName, double price, int quantity, String expire) async {
+  void _addSell(String scannedBarcode, String productName, double price,
+      int quantity, String expire) async {
     String currentDate = DateTime.now().toString().substring(0, 10);
-    String selectedDate = _selectedTimePeriod == 'Today' ? currentDate : ''; // You might need to handle other time periods accordingly
+    String selectedDate = _selectedTimePeriod == 'Today'
+        ? currentDate
+        : ''; // You might need to handle other time periods accordingly
     try {
       final pharmacySnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -179,8 +268,12 @@ class _SellsState extends State<Sells> {
           .doc(pharmacyId)
           .collection('sells')
           .doc(selectedDate)
-          .collection('dailySells') // Create a subcollection to store daily sells
+          .collection(
+          'dailySells') // Create a subcollection to store daily sells
           .doc(); // Automatically generate a unique document ID
+
+      // Add current time
+      DateTime currentTime = DateTime.now();
 
       // Create a new sell document inside the selectedDate document
       await sellRef.set({
@@ -188,12 +281,28 @@ class _SellsState extends State<Sells> {
         'price': price,
         'quantity': quantity,
         'expire': expire,
+        'time': currentTime, // Add current time
+        'seller': widget.userEmail
       });
     } catch (error) {
       print("Error adding sell: $error");
     }
   }
 
+  String _getDateForPeriod(String period) {
+    DateTime today = DateTime.now();
+    switch (period) {
+      case 'Today':
+        return today.toString().substring(0, 10);
+      case 'Yesterday':
+        DateTime yesterday = today.subtract(Duration(days: 1));
+        return yesterday.toString().substring(0, 10);
+      case 'All':
+        return '0';
+        default:
+        return '';
+    }
+  }
 
 
   @override
@@ -215,16 +324,22 @@ class _SellsState extends State<Sells> {
               ),
               onChanged: (value) {
                 setState(() {
-                  _selectedTimePeriod = value!;
-                  _sellsDataFuture = fetchSellsData(); // Refresh sells data
-                });
+                  String selectedDate = _getDateForPeriod(value!);
+                  _selectedTimePeriod = value;
+                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate); // Refresh sells data with selected date
+                  }
+                );
               },
-              items: ['Today', 'Yesterday', 'Last Week', 'Last Month', 'Pick Date']
-                  .map((period) => DropdownMenuItem(
-                value: period,
-                child: Text(period),
-              ))
-                  .toList(),
+              items: [
+                'Today',
+                'Yesterday',
+                'All', // Add 'All' option
+              ].map((period) {
+                return DropdownMenuItem(
+                  value: period,
+                  child: Text(period),
+                );
+              }).toList(),
             ),
           ),
           Expanded(
@@ -237,20 +352,34 @@ class _SellsState extends State<Sells> {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 } else {
                   List<Map<String, dynamic>> sellsData = snapshot.data ?? [];
-                  return ListView.builder(
-                    itemCount: sellsData.length,
-                    itemBuilder: (context, index) {
-                      Map<String, dynamic> sell = sellsData[index];
-                      return ListTile(
-                        title: Text(sell['productName'] ?? ''),
-                        subtitle: Text('Price: \$${sell['price'] ?? ''}'),
-                        trailing: Text('Qty: ${sell['quantity'] ?? ''}'),
-                        onTap: () {
-                          // Add functionality for tapping on a sold product if needed
-                        },
-                      );
-                    },
-                  );
+                  print(sellsData); // Print sellsData here
+                  if (sellsData.isEmpty) {
+                    return Center(child: Text(
+                        "No sells data found for $_selectedTimePeriod"));
+                  } else {
+                    return ListView.builder(
+                      itemCount: sellsData.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> sell = sellsData[index];
+                        return ListTile(
+                          title: Text(sell['productName'] ?? ''),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Price: \$${sell['price'] ?? ''}'),
+                              Text('Qty: ${sell['quantity'] ?? ''}'),
+                              Text('seller: ${sell['seller'] ?? ''}'),
+                              Text('expire: ${sell['expire'] ?? ''}'),
+                              Text('time: ${sell['time'] ?? ''}'),// Display the document ID here
+                            ],
+                          ),
+                          onTap: () {
+                            // Add functionality for tapping on a sold product if needed
+                          },
+                        );
+                      },
+                    );
+                  }
                 }
               },
             ),
