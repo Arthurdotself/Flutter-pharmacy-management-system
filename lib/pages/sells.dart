@@ -76,10 +76,37 @@ class _SellsState extends State<Sells> {
     });
   }
 
-  void _showAddSellDialog(String scannedBarcode) {
+  void _showAddSellDialog(String scannedBarcode) async {
     String productName = '';
-    String price = '';
-    String quantity = '';
+    double price = 0.0;
+    int quantity = 0;
+    String selectedExpirationDate = '';
+
+    try {
+      final docRef = FirebaseFirestore.instance
+          .collection('pharmacies')
+          .doc(widget.pharmacyId)
+          .collection('medicines')
+          .doc(scannedBarcode);
+
+      final docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        productName = data['Name'] ?? '';
+        price = data['price'] != null ? double.parse(data['price'].toString()) : 0.0;
+        quantity = data['quantity'] != null ? int.parse(data['quantity'].toString()) : 0;
+
+        // Now we need to retrieve the expiration dates from the shipments array
+        List<dynamic> shipments = data['shipments'] ?? [];
+        if (shipments.isNotEmpty) {
+          // For simplicity, let's just use the first expiration date from the shipments array
+          selectedExpirationDate = shipments[0]['expire'] ?? '';
+        }
+      }
+    } catch (error) {
+      print("Error fetching product data: $error");
+    }
 
     showDialog(
       context: context,
@@ -97,18 +124,20 @@ class _SellsState extends State<Sells> {
                 ),
                 TextField(
                   onChanged: (value) {
-                    price = value;
+                    price = double.parse(value);
                   },
                   decoration: const InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   onChanged: (value) {
-                    quantity = value;
+                    quantity = int.parse(value);
                   },
                   decoration: const InputDecoration(labelText: 'Quantity'),
                   keyboardType: TextInputType.number,
                 ),
+                // Optionally, you can display the selected expiration date or provide a dropdown to choose from the available expiration dates
+                Text(selectedExpirationDate.isNotEmpty ? 'Selected Expiration Date: $selectedExpirationDate' : 'No expiration date selected'),
               ],
             ),
           ),
@@ -122,7 +151,7 @@ class _SellsState extends State<Sells> {
             TextButton(
               onPressed: () {
                 // Perform add sell operation here
-                _addSell(scannedBarcode, productName, double.parse(price), int.parse(quantity));
+                _addSell(scannedBarcode, productName, price, quantity, selectedExpirationDate);
                 Navigator.of(context).pop();
               },
               child: const Text("Save"),
@@ -133,7 +162,11 @@ class _SellsState extends State<Sells> {
     );
   }
 
-  void _addSell(String scannedBarcode, String productName, double price, int quantity) async {
+
+
+  void _addSell(String scannedBarcode, String productName, double price, int quantity, String expire) async {
+    String currentDate = DateTime.now().toString().substring(0, 10);
+    String selectedDate = _selectedTimePeriod == 'Today' ? currentDate : ''; // You might need to handle other time periods accordingly
     try {
       final pharmacySnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -145,30 +178,23 @@ class _SellsState extends State<Sells> {
           .collection('pharmacies')
           .doc(pharmacyId)
           .collection('sells')
-          .doc(scannedBarcode);
+          .doc(selectedDate)
+          .collection('dailySells') // Create a subcollection to store daily sells
+          .doc(); // Automatically generate a unique document ID
 
-      // Check if the sell already exists
-      final sellSnapshot = await sellRef.get();
-
-      if (sellSnapshot.exists) {
-        // Update the existing sell with new data
-        await sellRef.update({
-          'productName': productName,
-          'price': price,
-          'quantity': FieldValue.increment(quantity), // Increment quantity if sell already exists
-        });
-      } else {
-        // Create a new sell document
-        await sellRef.set({
-          'productName': productName,
-          'price': price,
-          'quantity': quantity,
-        });
-      }
+      // Create a new sell document inside the selectedDate document
+      await sellRef.set({
+        'productName': productName,
+        'price': price,
+        'quantity': quantity,
+        'expire': expire,
+      });
     } catch (error) {
       print("Error adding sell: $error");
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
