@@ -53,122 +53,132 @@ class _DashboardPageState extends State<DashboardPage> {
       drawer: NavBar(),
       body: Padding(
         padding: EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // First section
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: 'Medicines\n',
-                    icon: Icons.local_pharmacy,
-                    future: _medicinesCountFuture,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Inventory(
-                            userEmail: userEmail,
-                            pharmacyId: pharmacyId,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // First section
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardItem(
+                      title: 'Medicines',
+                      icon: Icons.local_pharmacy,
+                      future: _medicinesCountFuture,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Inventory(
+                              userEmail: userEmail,
+                              pharmacyId: pharmacyId,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: 'Add\nSells',
-                    icon: Icons.monetization_on,
-                    future: getSellsCount(),
-                    onTap: () {
-                      sellscanBarcode(context);
-                    },
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    child: _buildDashboardItem(
+                      title: 'Add\nSells',
+                      icon: Icons.monetization_on,
+                      future: getSellsCount(),
+                      onTap: () {
+                        sellscanBarcode(context);
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: 'Expiring & Expired',
-                    icon: Icons.timer,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TestNewThingsPage(),
-                        ),
-                      );
-                    },
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    child: _buildDashboardItem(
+                      title: 'Expiring & Expired',
+                      icon: Icons.timer,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TestNewThingsPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20.0),
-            // Second section
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: _buildDashboardItem(
-                    title: 'Patient Profile',
-                    icon: Icons.account_circle,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PatientProfilePage(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  flex: 1,
-                  child: _buildDashboardItem(
-                    title: 'Tasks',
-                    icon: Icons.assignment,
-                    future: countTasks(context),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TasksPage(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20.0),
-            // Third section (Bar chart)
-            Text(
-              'Sells of Last 7 Days',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+                ],
               ),
-            ),
-            SizedBox(height: 10.0),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: dailySales.isNotEmpty
-                    ? _buildBarChart(dailySales.cast<Map<String, dynamic>>())
-                    : Center(
-                  child: CircularProgressIndicator(),
+              SizedBox(height: 20.0),
+              // Second section
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: _buildDashboardItem(
+                      title: 'Patient Profile',
+                      icon: Icons.account_circle,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientProfilePage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    flex: 1,
+                    child: _buildDashboardItem(
+                      title: 'Tasks',
+                      icon: Icons.assignment,
+                      future: countTasks(context),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TasksPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.0),
+              // Third section (Bar chart)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sells of Last 7 Days',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Container(
+                      height: 200.0, // Set a fixed height for the chart container
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: dailySales.isNotEmpty
+                            ? _buildBarChart(dailySales.cast<Map<String, dynamic>>())
+                            : Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
