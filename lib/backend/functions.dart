@@ -204,8 +204,8 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode, String user
               ),
               TextButton(
                 onPressed: () {
-                  _addSell(scannedBarcode, productName, price, quantity,
-                      selectedExpirationDate, userEmail);
+                  addSell(scannedBarcode, productName, price, quantity,
+                      selectedExpirationDate);
                   Navigator.of(context).pop();
                 },
                 child: const Text("Save"),
@@ -218,10 +218,11 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode, String user
   );
 }
 
-void _addSell(String scannedBarcode, String productName, double price,
-    int quantity, String expire, String userEmail) async {
+void addSell(String scannedBarcode, String productName, double price,
+    int quantity, String expire) async {
   String currentDate = DateTime.now().toString().substring(0, 10);
   try {
+    String? userEmail;
     final pharmacySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(userEmail)
@@ -234,36 +235,23 @@ void _addSell(String scannedBarcode, String productName, double price,
         .collection('sells')
         .doc(currentDate)
         .collection(
-        'dailySells')
-        .doc();
+        'dailySells') // Create a subcollection to store daily sells
+        .doc(); // Automatically generate a unique document ID
 
+    // Add current time
     DateTime currentTime = DateTime.now();
 
+    // Create a new sell document inside the selectedDate document
     await sellRef.set({
       'productName': productName,
       'price': price,
       'quantity': quantity,
       'expire': expire,
-      'time': currentTime,
+      'time': currentTime, // Add current time
       'seller': userEmail
     });
   } catch (error) {
     print("Error adding sell: $error");
-  }
-}
-
-String _getDateForPeriod(String period) {
-  DateTime today = DateTime.now();
-  switch (period) {
-    case 'Today':
-      return today.toString().substring(0, 10);
-    case 'Yesterday':
-      DateTime yesterday = today.subtract(Duration(days: 1));
-      return yesterday.toString().substring(0, 10);
-    case 'All':
-      return '0';
-    default:
-      return '';
   }
 }
 

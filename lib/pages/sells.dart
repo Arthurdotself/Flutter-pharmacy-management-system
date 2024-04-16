@@ -184,7 +184,7 @@ class _SellsState extends State<Sells> {
                 TextButton(
                   onPressed: () {
                     // Perform add sell operation here
-                    _addSell(scannedBarcode, productName, price, quantity,
+                    addSell(scannedBarcode, productName, price, quantity,
                         selectedExpirationDate);
                     Navigator.of(context).pop();
                   },
@@ -196,44 +196,6 @@ class _SellsState extends State<Sells> {
         );
       },
     );
-  }
-
-
-
-  void _addSell(String scannedBarcode, String productName, double price,
-      int quantity, String expire) async {
-    String currentDate = DateTime.now().toString().substring(0, 10);
-    try {
-      final pharmacySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userEmail)
-          .get();
-      final pharmacyId = pharmacySnapshot['pharmacyId'];
-
-      final sellRef = FirebaseFirestore.instance
-          .collection('pharmacies')
-          .doc(pharmacyId)
-          .collection('sells')
-          .doc(currentDate)
-          .collection(
-          'dailySells') // Create a subcollection to store daily sells
-          .doc(); // Automatically generate a unique document ID
-
-      // Add current time
-      DateTime currentTime = DateTime.now();
-
-      // Create a new sell document inside the selectedDate document
-      await sellRef.set({
-        'productName': productName,
-        'price': price,
-        'quantity': quantity,
-        'expire': expire,
-        'time': currentTime, // Add current time
-        'seller': widget.userEmail
-      });
-    } catch (error) {
-      print("Error adding sell: $error");
-    }
   }
 
   String _getDateForPeriod(String period) {
@@ -282,7 +244,7 @@ class _SellsState extends State<Sells> {
                 setState(() {
                   String selectedDate = _getDateForPeriod(value!);
                   _selectedTimePeriod = value;
-                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate);// Refresh sells data with selected date
+                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate, context: context);// Refresh sells data with selected date
                   }
                 );
               },
