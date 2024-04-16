@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -10,14 +9,9 @@ import 'package:tugas1_login/pages/sells.dart';
 import 'package:tugas1_login/pages/notes.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
-import 'package:tugas1_login/pages/login.dart';
 import 'package:tugas1_login/main.dart';
 import 'package:tugas1_login/pages/setting.dart';
 import 'home.dart';
-import 'notes.dart';
-import 'package:tugas1_login/pages/purchaseInvoices.dart';
-import 'package:tugas1_login/pages/dashboard.dart';
-import 'package:tugas1_login/pages/expiring&expired.dart';
 import 'package:tugas1_login/pages/tasks.dart';
 import 'package:tugas1_login/pages/test.dart';
 import 'package:tugas1_login/pages/patientProfile.dart';
@@ -128,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      drawer: NavBar(userId: widget.userId),
+      drawer: NavBar(userId: widget.userId , PharmacyId:widget.PharmacyId),
       body: Padding(
         padding: EdgeInsets.all(10.0),
         child: Column(
@@ -156,11 +150,12 @@ class _DashboardPageState extends State<DashboardPage> {
                           onTap: () {
                             UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
                             String userId = userProvider.userId;
+                            String pharmacyId = userProvider.PharmacyId;
                             Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Inventory(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF' ),
+                                builder: (context) => Inventory(userEmail: userId, pharmacyId: pharmacyId ),
                               ),
                             );
                           },
@@ -413,14 +408,14 @@ class DaySales {
 
 void main() {
   runApp(MaterialApp(
-    home: DashboardPage(userId: 'user_id', PharmacyId: 'pharmacy_id'),
+    home: DashboardPage(userId: 'user_id', PharmacyId: 'PharmacyId'),
   ));
 }
 
 class NavBar extends StatelessWidget {
   final String userId;
-
-  const NavBar({Key? key, required this.userId}) : super(key: key);
+  final String PharmacyId;
+  const NavBar({Key? key, required this.userId,required this.PharmacyId}) : super(key: key);
 
   Future<void> _uploadImage(BuildContext context) async {
     final ImagePicker picker = ImagePicker(); // Declare _picker here
@@ -537,7 +532,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardPage( userId: userId, PharmacyId: 'KYFUz7GO7IHV8tsLAYGF',),
+                        builder: (context) => DashboardPage( userId: userId, PharmacyId: PharmacyId),
                       ),
                     );
                   },
@@ -551,7 +546,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Inventory(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF' ),
+                        builder: (context) => Inventory(userEmail: userId, pharmacyId: PharmacyId ),
                       ),
                     );
                   },
@@ -565,7 +560,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Sells(userEmail: userId, pharmacyId: 'KYFUz7GO7IHV8tsLAYGF'),
+                        builder: (context) => Sells(userEmail: userId, pharmacyId: PharmacyId),
                       ),
                     );
                   },
