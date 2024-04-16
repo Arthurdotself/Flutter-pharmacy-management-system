@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart'; // Import Flutter material library
-
+import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
-
 import '../main.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -34,17 +32,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-  // Trigger fetchExpiredMedicines after 10 seconds
-  Future.delayed(Duration(seconds: 10), () {
-    NotificationHandler.fetchExpiredMedicines();
-  });
-}
-
 class NotificationHandler {
   static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static Future<void> fetchExpiredMedicines(BuildContext context) async { // Pass BuildContext as a parameter
+  static Future<void> fetchExpiredMedicines(BuildContext context) async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     String pharmacyId = userProvider.PharmacyId;
     try {
