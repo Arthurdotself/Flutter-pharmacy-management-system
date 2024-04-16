@@ -15,7 +15,6 @@ import '../backend/functions.dart';
 import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
-
   const DashboardPage({Key? key}) : super(key: key);
 
   @override
@@ -45,9 +44,9 @@ class _DashboardPageState extends State<DashboardPage> {
         title: Text(
           'Dashboard',
           style: TextStyle(
-            fontSize: 20.0, // Adjust font size as needed
-            fontWeight: FontWeight.bold, // Adjust font weight as needed
-            color: Colors.black, // Adjust text color as needed
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ),
@@ -61,86 +60,46 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               children: [
                 Expanded(
-                  child: FutureBuilder<int>(
+                  child: _buildDashboardItem(
+                    title: 'Medicines\n',
+                    icon: Icons.local_pharmacy,
                     future: _medicinesCountFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text("Error: ${snapshot.error}");
-                      } else {
-                        int? medicinesCount = snapshot.data;
-                        return _buildDashboardItem(
-                          title: 'Medicines\n',
-                          icon: Icons.local_pharmacy,
-                          number: medicinesCount,
-                          color: Colors.blue.shade50,
-                          iconColor: Colors.blue.shade800,
-                          onTap: () {
-                            UserProvider userProvider = Provider.of<
-                                UserProvider>(context, listen: false);
-                            String userId = userProvider.userId;
-                            String pharmacyId = userProvider.PharmacyId;
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    Inventory(userEmail: userId,
-                                        pharmacyId: pharmacyId),
-                              ),
-                            );
-                          },
-                        );
-                      }
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Inventory(
+                            userEmail: userEmail,
+                            pharmacyId: pharmacyId,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
                 SizedBox(width: 10.0),
                 Expanded(
-                  child: FutureBuilder<int>(
+                  child: _buildDashboardItem(
+                    title: 'Add\nSells',
+                    icon: Icons.monetization_on,
                     future: getSellsCount(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text("Error: ${snapshot.error}");
-                      } else {
-                        int? sellsCount = snapshot.data;
-                        return _buildDashboardItem(
-                          title: 'Add\nSells',
-                          icon: Icons.monetization_on,
-                          number: sellsCount,
-                          color: Colors.blue.shade50,
-                          iconColor: Colors.green.shade700,
-                          onTap: () {
-                            sellscanBarcode(context);
-                            // Add functionality for the Sells container
-                          },
-                        );
-                      }
+                    onTap: () {
+                      sellscanBarcode(context);
                     },
                   ),
                 ),
-
                 SizedBox(width: 10.0),
                 Expanded(
-                  child: FutureBuilder<int>(
-                    future: getExpiringCount(),
-                    builder: (context, snapshot) {
-                      return _buildDashboardItem(
-                        title: 'Expiring & Expired',
-                        icon: Icons.timer,
-                        // number: snapshot.connectionState == ConnectionState.done ? snapshot.data ?? 0 : null,
-                        color: Colors.blue.shade50,
-                        iconColor: Colors.orange.shade800,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TestNewThingsPage()),
-                          );
-                        },
+                  child: _buildDashboardItem(
+                    title: 'Expiring & Expired',
+                    icon: Icons.timer,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TestNewThingsPage(),
+                        ),
                       );
                     },
                   ),
@@ -148,7 +107,6 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             SizedBox(height: 20.0),
-
             // Second section
             Row(
               children: [
@@ -157,14 +115,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: _buildDashboardItem(
                     title: 'Patient Profile',
                     icon: Icons.account_circle,
-                    color: Colors.blue.shade50,
-                    iconColor: Colors.teal.shade500,
-                    // Customize color
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PatientProfilePage()),
+                          builder: (context) => PatientProfilePage(),
+                        ),
                       );
                     },
                   ),
@@ -172,58 +128,42 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   flex: 1,
-                  child: FutureBuilder<int>(
+                  child: _buildDashboardItem(
+                    title: 'Tasks',
+                    icon: Icons.assignment,
                     future: countTasks(context),
-                    // Use the countTasks method to fetch the count
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text("Error: ${snapshot.error}");
-                      } else {
-                        int? tasksCount = snapshot
-                            .data; // Get the tasks count from the snapshot
-                        return _buildDashboardItem(
-                          title: 'Tasks',
-                          icon: Icons.assignment,
-                          number: tasksCount,
-                          // Use the tasks count
-                          color: Colors.blue.shade50,
-                          iconColor: Colors.yellow.shade700,
-                          // Customize color
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TasksPage()),
-                            );
-                          },
-                        );
-                      }
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TasksPage(),
+                        ),
+                      );
                     },
                   ),
                 ),
               ],
             ),
             SizedBox(height: 20.0),
-
             // Third section (Bar chart)
             Text(
               'Sells of Last 7 Days',
               style: TextStyle(
-                fontSize: 20.0, // Adjust font size as needed
-                fontWeight: FontWeight.bold, // Adjust font weight as needed
-                color: Colors.black, // Adjust text color as needed
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-            SizedBox(height: 10.0), Expanded(
+            SizedBox(height: 10.0),
+            Expanded(
               child: Container(
                 padding: EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: dailySales.isNotEmpty ? _buildBarChart(
-                    dailySales.cast<Map<String, dynamic>>()) : Center(
+                child: dailySales.isNotEmpty
+                    ? _buildBarChart(dailySales.cast<Map<String, dynamic>>())
+                    : Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
@@ -237,84 +177,58 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildDashboardItem({
     required String title,
     required IconData icon,
-    int? number,
-    required Color color, // Color for the container background
-    required Color iconColor, // Color for the icon
+    Future<int>? future,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(20.0),
-        decoration: BoxDecoration(
-          color: color, // Set container color
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 50.0,
-              color: iconColor, // Set icon color
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.0, // Adjust font size as needed
-                color: Colors.black, // Adjust text color as needed
+    return FutureBuilder<int>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
+        } else {
+          int? itemCount = snapshot.data;
+          return GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 50.0,
+                    color: Colors.blue.shade800,
+                  ),
+                  SizedBox(height: 10.0),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 5.0),
+                  Text(
+                    itemCount != null ? '$itemCount' : '',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 5.0),
-            Text(
-              number != null ? '$number' : '',
-              style: TextStyle(
-                fontSize: 16.0, // Adjust font size as needed
-                color: Colors.black, // Adjust text color as needed
-              ),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
   }
-
-  // Future<void> fetchSellsData() async {
-  //   try {
-  //     // Calculate the date 7 days ago
-  //     DateTime sevenDaysAgo = DateTime.now().subtract(Duration(days: 7));
-  //
-  //     // Query the Firestore collection for sells data within the last 7 days
-  //     QuerySnapshot sellsSnapshot = await FirebaseFirestore.instance
-  //         .collection('pharmacies')
-  //         .doc(widget.PharmacyId)
-  //         .collection('sells')
-  //         .where('date', isGreaterThanOrEqualTo: sevenDaysAgo) // Filter data for the last 7 days
-  //         .get();
-  //
-  //     List<CounterData> data = [];
-  //
-  //     for (var doc in sellsSnapshot.docs) {
-  //       Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?;
-  //
-  //       // Get the 'data' array from the document
-  //       List<dynamic>? dataArray = dataMap?['data'];
-  //
-  //       // Calculate the total count of items in the 'data' array
-  //       int count = dataArray?.length ?? 0;
-  //
-  //       data.add(CounterData(count));
-  //     }
-  //
-  //     setState(() {
-  //       dailySales = data;
-  //     });
-  //   } catch (error) {
-  //     print("Error fetching sales data: $error");
-  //   }
-  // }
-
 
   Widget _buildBarChart(List<Map<String, dynamic>> firebaseData) {
     // Convert Firebase data into a map of time and item counts
@@ -358,8 +272,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
-
-  class DaySales {
+class DaySales {
   final String day;
   final int amount;
 
@@ -374,7 +287,6 @@ void main() {
 }
 
 class NavBar extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
