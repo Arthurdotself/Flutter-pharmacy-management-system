@@ -4,7 +4,6 @@ import 'package:sign_in_button/sign_in_button.dart';
 import 'package:tugas1_login/pages/reset_password.dart';
 import 'package:tugas1_login/pages/signup.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:tugas1_login/pages/home.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -122,7 +121,7 @@ class _LoginState extends State<Login> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardPage(userId: email,PharmacyId: pharmacyId ),
+                        builder: (context) => DashboardPage( ),
                       ),
                     );
                   } catch (Error) {

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'dart:io';
 import 'package:tugas1_login/pages/Inventory.dart';
 import 'package:tugas1_login/pages/sells.dart';
 import 'package:tugas1_login/pages/notes.dart';
@@ -11,24 +8,18 @@ import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:tugas1_login/main.dart';
 import 'package:tugas1_login/pages/setting.dart';
-import 'home.dart';
 import 'package:tugas1_login/pages/tasks.dart';
 import 'package:tugas1_login/pages/test.dart';
 import 'package:tugas1_login/pages/patientProfile.dart';
+import '../backend/functions.dart';
+import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
-  final String userId;
-  final String PharmacyId;
 
-  const DashboardPage({Key? key, required this.userId, required this.PharmacyId}) : super(key: key);
+  const DashboardPage({Key? key}) : super(key: key);
 
   @override
   _DashboardPageState createState() => _DashboardPageState();
-  Future<int> getSellsCount(String pharmacyId) async {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).collection('sells').get();
-
-    return snapshot.docs.length;
-  }
 }
 
 class _DashboardPageState extends State<DashboardPage> {
@@ -37,76 +28,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void initState() {
+    setUserEmail(context);
     super.initState();
     _medicinesCountFuture = getMedicinesCount();
-    fetchSalesData();
-  }
-  Future<int> countTasks(BuildContext context) async {
-    try {
-      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-      String userId = userProvider.userId;
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').get();
-
-      int totalTasks = querySnapshot.size;
-      int completedTasks = querySnapshot.docs.where((doc) => doc['isCompleted'] == true).length;
-      int pendingTasks = totalTasks - completedTasks;
-
-      print('Total tasks: $totalTasks');
-      print('Completed tasks: $completedTasks');
-      print('Pending tasks: $pendingTasks');
-
-      return pendingTasks; // Return the total number of tasks
-    } catch (error) {
-      print('Error counting tasks: $error');
-      return 0; // Return 0 in case of an error
-    }
-  }
-
-
-  Future<int> getExpiringCount() async {
-    // Get today's date
-    DateTime now = DateTime.now();
-
-    // Define the start and end dates for the range (e.g., 24 hours before and after today)
-    DateTime startDate = DateTime(now.year, now.month, now.day - 1); // 24 hours before today
-    DateTime endDate = DateTime(now.year, now.month, now.day + 1); // 24 hours after today
-
-    // Query shipments within the date range
-    QuerySnapshot shipmentsSnapshot = await FirebaseFirestore.instance
-        .collection('pharmacies')
-        .doc(widget.PharmacyId)
-        .collection('medicines')
-        .where('shipments.date', isGreaterThanOrEqualTo: startDate, isLessThan: endDate)
-        .get();
-
-    // Initialize the count of medicines
-    int medicinesCount = 0;
-
-    // Iterate over each document in the shipments collection
-    for (QueryDocumentSnapshot doc in shipmentsSnapshot.docs) {
-      // Get the list of shipments for the current document
-      List<dynamic> shipments = doc['shipments'];
-
-      // Iterate over each shipment in the list
-      for (dynamic shipment in shipments) {
-        // Extract the shipment date
-        DateTime shipmentDate = DateTime.parse(shipment['date']);
-
-        // Check if the shipment date is within the specified range
-        if (shipmentDate.isAfter(startDate) && shipmentDate.isBefore(endDate)) {
-          // Increment the count of medicines associated with this shipment
-          medicinesCount++;
-        }
-      }
-    }
-
-    return medicinesCount;
-  }
-
-  Future<int> getMedicinesCount() async {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('pharmacies').doc(widget.PharmacyId).collection('medicines').get();
-
-    return snapshot.docs.length;
+    fetchSellsData(selectedDate: '7').then((data) {
+      setState(() {
+        dailySales = data.cast<CounterData>();
+      });
+    });
   }
 
   @override
@@ -122,7 +51,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      drawer: NavBar(userId: widget.userId , PharmacyId:widget.PharmacyId),
+      drawer: NavBar(),
       body: Padding(
         padding: EdgeInsets.all(10.0),
         child: Column(
@@ -148,14 +77,17 @@ class _DashboardPageState extends State<DashboardPage> {
                           color: Colors.blue.shade50,
                           iconColor: Colors.blue.shade800,
                           onTap: () {
-                            UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                            UserProvider userProvider = Provider.of<
+                                UserProvider>(context, listen: false);
                             String userId = userProvider.userId;
                             String pharmacyId = userProvider.PharmacyId;
                             Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Inventory(userEmail: userId, pharmacyId: pharmacyId ),
+                                builder: (context) =>
+                                    Inventory(userEmail: userId,
+                                        pharmacyId: pharmacyId),
                               ),
                             );
                           },
@@ -167,7 +99,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   child: FutureBuilder<int>(
-                    future: widget.getSellsCount(widget.PharmacyId),
+                    future: getSellsCount(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return CircularProgressIndicator();
@@ -182,6 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           color: Colors.blue.shade50,
                           iconColor: Colors.green.shade700,
                           onTap: () {
+                            sellscanBarcode(context);
                             // Add functionality for the Sells container
                           },
                         );
@@ -198,13 +131,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       return _buildDashboardItem(
                         title: 'Expiring & Expired',
                         icon: Icons.timer,
-                       // number: snapshot.connectionState == ConnectionState.done ? snapshot.data ?? 0 : null,
+                        // number: snapshot.connectionState == ConnectionState.done ? snapshot.data ?? 0 : null,
                         color: Colors.blue.shade50,
                         iconColor: Colors.orange.shade800,
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TestNewThingsPage()),
+                            MaterialPageRoute(
+                                builder: (context) => TestNewThingsPage()),
                           );
                         },
                       );
@@ -224,11 +158,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     title: 'Patient Profile',
                     icon: Icons.account_circle,
                     color: Colors.blue.shade50,
-                    iconColor: Colors.teal.shade500,// Customize color
+                    iconColor: Colors.teal.shade500,
+                    // Customize color
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => PatientProfilePage()),
+                        MaterialPageRoute(
+                            builder: (context) => PatientProfilePage()),
                       );
                     },
                   ),
@@ -237,24 +173,29 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   flex: 1,
                   child: FutureBuilder<int>(
-                    future: countTasks(context), // Use the countTasks method to fetch the count
+                    future: countTasks(context),
+                    // Use the countTasks method to fetch the count
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return CircularProgressIndicator();
                       } else if (snapshot.hasError) {
                         return Text("Error: ${snapshot.error}");
                       } else {
-                        int? tasksCount = snapshot.data; // Get the tasks count from the snapshot
+                        int? tasksCount = snapshot
+                            .data; // Get the tasks count from the snapshot
                         return _buildDashboardItem(
                           title: 'Tasks',
                           icon: Icons.assignment,
-                          number: tasksCount, // Use the tasks count
+                          number: tasksCount,
+                          // Use the tasks count
                           color: Colors.blue.shade50,
-                          iconColor: Colors.yellow.shade700, // Customize color
+                          iconColor: Colors.yellow.shade700,
+                          // Customize color
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => TasksPage()),
+                              MaterialPageRoute(
+                                  builder: (context) => TasksPage()),
                             );
                           },
                         );
@@ -275,14 +216,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 color: Colors.black, // Adjust text color as needed
               ),
             ),
-            SizedBox(height: 10.0),
-            Expanded(
+            SizedBox(height: 10.0), Expanded(
               child: Container(
                 padding: EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: dailySales.isNotEmpty ? _buildBarChart() : Center(child: CircularProgressIndicator()),
+                child: dailySales.isNotEmpty ? _buildBarChart(
+                    dailySales.cast<Map<String, dynamic>>()) : Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
             ),
           ],
@@ -336,47 +279,65 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-  Future<void> fetchSalesData() async {
-    try {
-      // Calculate the date 7 days ago
-      DateTime sevenDaysAgo = DateTime.now().subtract(Duration(days: 7));
 
-      // Query the Firestore collection for sells data within the last 7 days
-      QuerySnapshot sellsSnapshot = await FirebaseFirestore.instance
-          .collection('pharmacies')
-          .doc(widget.PharmacyId)
-          .collection('sells')
-          .where('date', isGreaterThanOrEqualTo: sevenDaysAgo) // Filter data for the last 7 days
-          .get();
+  // Future<void> fetchSellsData() async {
+  //   try {
+  //     // Calculate the date 7 days ago
+  //     DateTime sevenDaysAgo = DateTime.now().subtract(Duration(days: 7));
+  //
+  //     // Query the Firestore collection for sells data within the last 7 days
+  //     QuerySnapshot sellsSnapshot = await FirebaseFirestore.instance
+  //         .collection('pharmacies')
+  //         .doc(widget.PharmacyId)
+  //         .collection('sells')
+  //         .where('date', isGreaterThanOrEqualTo: sevenDaysAgo) // Filter data for the last 7 days
+  //         .get();
+  //
+  //     List<CounterData> data = [];
+  //
+  //     for (var doc in sellsSnapshot.docs) {
+  //       Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?;
+  //
+  //       // Get the 'data' array from the document
+  //       List<dynamic>? dataArray = dataMap?['data'];
+  //
+  //       // Calculate the total count of items in the 'data' array
+  //       int count = dataArray?.length ?? 0;
+  //
+  //       data.add(CounterData(count));
+  //     }
+  //
+  //     setState(() {
+  //       dailySales = data;
+  //     });
+  //   } catch (error) {
+  //     print("Error fetching sales data: $error");
+  //   }
+  // }
 
-      List<CounterData> data = [];
 
-      for (var doc in sellsSnapshot.docs) {
-        Map<String, dynamic>? dataMap = doc.data() as Map<String, dynamic>?;
+  Widget _buildBarChart(List<Map<String, dynamic>> firebaseData) {
+    // Convert Firebase data into a map of time and item counts
+    Map<String, int> itemCountByTime = {};
 
-        // Get the 'data' array from the document
-        List<dynamic>? dataArray = dataMap?['data'];
+    firebaseData.forEach((data) {
+      // Extract the timestamp and convert it to a date string
+      String time = DateFormat('EEE').format(data['time'].toDate());
 
-        // Calculate the total count of items in the 'data' array
-        int count = dataArray?.length ?? 0;
+      // Print the timestamp and date string for debugging
+      print('Timestamp: ${data['time']}, Date: $time');
 
-        data.add(CounterData(count));
-      }
-
-      setState(() {
-        dailySales = data;
-      });
-    } catch (error) {
-      print("Error fetching sales data: $error");
-    }
-  }
-
-
-
-
-  Widget _buildBarChart() {
-    // Convert CounterData into DaySales for charting
-    List<DaySales> daySalesList = dailySales.map((data) => DaySales(data.count.toString(), data.count)).toList();
+      // Update the map with the count for the corresponding date
+      itemCountByTime.update(
+        time,
+            (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    });
+    // Convert the map into a list of DaySales
+    List<DaySales> daySalesList = itemCountByTime.entries
+        .map((entry) => DaySales(entry.key, entry.value))
+        .toList();
 
     // Define the series list using the converted data
     List<charts.Series<DaySales, String>> seriesList = [
@@ -396,90 +357,29 @@ class _DashboardPageState extends State<DashboardPage> {
       barGroupingType: charts.BarGroupingType.grouped,
     );
   }
-
 }
 
-class DaySales {
+  class DaySales {
   final String day;
   final int amount;
 
   DaySales(this.day, this.amount);
 }
 
+
 void main() {
   runApp(MaterialApp(
-    home: DashboardPage(userId: 'user_id', PharmacyId: 'PharmacyId'),
+    home: DashboardPage(),
   ));
 }
 
 class NavBar extends StatelessWidget {
-  final String userId;
-  final String PharmacyId;
-  const NavBar({Key? key, required this.userId,required this.PharmacyId}) : super(key: key);
-
-  Future<void> _uploadImage(BuildContext context) async {
-    final ImagePicker picker = ImagePicker(); // Declare _picker here
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Choose Image Source'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                GestureDetector(
-                  child: Text('Take Photo'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    _getImage(picker, ImageSource.camera);
-                  },
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                ),
-                GestureDetector(
-                  child: Text('Choose from Gallery'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    _getImage(picker, ImageSource.gallery);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _getImage(ImagePicker picker, ImageSource source) async {
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-
-      try {
-        firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-            .ref()
-            .child('user_photos')
-            .child('${userId}_avatar.jpg');
-
-        await ref.putFile(imageFile);
-        String downloadURL = await ref.getDownloadURL();
-
-        await FirebaseFirestore.instance.collection('users').doc(userId).update({'photoURL': downloadURL});
-      } catch (error) {
-        print('Error uploading image: $error');
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+        future: FirebaseFirestore.instance.collection('users').doc(userEmail).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -498,7 +398,7 @@ class NavBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
-                        onTap: () => _uploadImage(context),
+                        onTap: () => uploadImage(context),
                         child: CircleAvatar(
                           backgroundImage: NetworkImage(
                             userData?['photoURL'] ?? 'https://firebasestorage.googleapis.com/v0/b/pharmacy-management-syst-cdbf2.appspot.com/o/2df47b6e-2d22-419e-979c-a2899a5be168.jpeg?alt=media&token=283932e4-414c-44c2-820f-2204fb12b41e',
@@ -532,7 +432,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardPage( userId: userId, PharmacyId: PharmacyId),
+                        builder: (context) => DashboardPage( ),
                       ),
                     );
                   },
@@ -546,7 +446,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Inventory(userEmail: userId, pharmacyId: PharmacyId ),
+                        builder: (context) => Inventory(userEmail: userEmail, pharmacyId: pharmacyId ),
                       ),
                     );
                   },
@@ -560,26 +460,11 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Sells(userEmail: userId, pharmacyId: PharmacyId),
+                        builder: (context) => Sells(userEmail: userEmail, pharmacyId: pharmacyId),
                       ),
                     );
                   },
                 ),
-
-                // ListTile(
-                //   leading: Icon(Icons.receipt_long),
-                //   title: Text('Purchase Invoices'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) => PurchaseInvoices(),
-                //       ),
-                //     );
-                //   },
-                // ),
-
                 ListTile(
                   leading: Icon(Icons.note_outlined),
                   title: Text('Notes'),
