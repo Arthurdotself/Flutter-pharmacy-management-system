@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../backend/functions.dart';
 
 
 class Sells extends StatefulWidget {
@@ -22,76 +23,8 @@ class _SellsState extends State<Sells> {
   @override
   void initState() {
     super.initState();
-    _sellsDataFuture = fetchSellsData();
+    _sellsDataFuture = fetchSellsData(context: context);
   }
-
-  Future<List<Map<String, dynamic>>> fetchSellsData({String? selectedDate}) async {
-    selectedDate ??= DateTime.now().toString().substring(0, 10); // Use current date if no date is provided
-
-    try {
-      // Fetch pharmacyId from user document
-      final userDataSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userEmail)
-          .get();
-      final pharmacyId = userDataSnapshot['pharmacyId'];
-      print('Pharmacy ID: $pharmacyId');
-
-      // If selectedDate is '0', retrieve all sells
-      if (selectedDate == '0') {
-        QuerySnapshot sellsQuerySnapshot = await FirebaseFirestore.instance
-            .collection('pharmacies')
-            .doc(pharmacyId)
-            .collection('sells')
-            .get();
-
-        List<Map<String, dynamic>> allSellsData = [];
-
-        for (QueryDocumentSnapshot doc in sellsQuerySnapshot.docs) {
-          QuerySnapshot dailySellsQuerySnapshot = await doc.reference.collection('dailySells').get();
-          dailySellsQuerySnapshot.docs.forEach((dailyDoc) {
-            allSellsData.add(dailyDoc.data() as Map<String, dynamic>);
-          });
-        }
-
-        if (allSellsData.isNotEmpty) {
-          print('All sells data fetched: $allSellsData');
-          return allSellsData;
-        } else {
-          print('No sells data found');
-          return [];
-        }
-      
-    } else {
-        // Retrieve sells data for the specified date
-        QuerySnapshot dailySellsQuerySnapshot = await FirebaseFirestore.instance
-            .collection('pharmacies')
-            .doc(pharmacyId)
-            .collection('sells')
-            .doc(selectedDate)
-            .collection('dailySells')
-            .get();
-
-        List<Map<String, dynamic>> sellsData = [];
-        dailySellsQuerySnapshot.docs.forEach((doc) {
-          sellsData.add(doc.data() as Map<String, dynamic>);
-        });
-
-        if (sellsData.isNotEmpty) {
-          print('Sells data fetched for date $selectedDate: $sellsData');
-          return sellsData;
-        } else {
-          print('No sells data found for date: $selectedDate');
-          return [];
-        }
-      }
-    } catch (error) {
-      print("Error fetching sells data: $error");
-      return [];
-    }
-  }
-
-
 
 
   Future<void> scanBarcode() async {
