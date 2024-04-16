@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tugas1_login/pages/home.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart'; // Import your UserProvider class
 import 'firebase_options.dart';
@@ -31,9 +30,8 @@ class MyApp extends StatelessWidget {
         home: Consumer<UserProvider>(
           builder: (context, userProvider, _) {
             String? userId = userProvider.userId;
-            String? pharmacyId = userProvider.PharmacyId;
             if (userId != null && userId.isNotEmpty) {
-              return DashboardPage(userId: userId , PharmacyId: pharmacyId,);
+              return DashboardPage();
             } else {
               return const Login();
             }
