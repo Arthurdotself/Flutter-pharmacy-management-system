@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 
 class Sells extends StatefulWidget {
   final String userEmail;
@@ -9,6 +11,7 @@ class Sells extends StatefulWidget {
 
   @override
   _SellsState createState() => _SellsState();
+
 }
 
 class _SellsState extends State<Sells> {
@@ -43,6 +46,7 @@ class _SellsState extends State<Sells> {
             .get();
 
         List<Map<String, dynamic>> allSellsData = [];
+
         for (QueryDocumentSnapshot doc in sellsQuerySnapshot.docs) {
           QuerySnapshot dailySellsQuerySnapshot = await doc.reference.collection('dailySells').get();
           dailySellsQuerySnapshot.docs.forEach((dailyDoc) {
@@ -57,7 +61,8 @@ class _SellsState extends State<Sells> {
           print('No sells data found');
           return [];
         }
-      } else {
+      
+    } else {
         // Retrieve sells data for the specified date
         QuerySnapshot dailySellsQuerySnapshot = await FirebaseFirestore.instance
             .collection('pharmacies')
@@ -89,7 +94,7 @@ class _SellsState extends State<Sells> {
 
 
 
-  Future<void> _scanBarcode() async {
+  Future<void> scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
       '#ff6666', // Scanner overlay color
       'Cancel', // Cancel button text
@@ -192,7 +197,18 @@ class _SellsState extends State<Sells> {
                     Text(selectedExpirationDate.isNotEmpty
                         ? 'Price: $price'
                         : 'No price available'),
-
+                    // Quantity Field
+                    TextFormField(
+                      initialValue: '1', // Initial value for quantity
+                      decoration: const InputDecoration(
+                        labelText: 'Quantity',
+                      ),
+                      keyboardType: TextInputType.number, // Allow only numeric input
+                      onChanged: (value) {
+                        // Update the quantity when the input changes
+                        quantity = int.tryParse(value) ?? 0;
+                      },
+                    ),
                     // Expiration Date Dropdown
                     DropdownButtonFormField<String>(
                       value: selectedExpirationDate,
@@ -250,12 +266,10 @@ class _SellsState extends State<Sells> {
   }
 
 
+
   void _addSell(String scannedBarcode, String productName, double price,
       int quantity, String expire) async {
     String currentDate = DateTime.now().toString().substring(0, 10);
-    String selectedDate = _selectedTimePeriod == 'Today'
-        ? currentDate
-        : ''; // You might need to handle other time periods accordingly
     try {
       final pharmacySnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -267,7 +281,7 @@ class _SellsState extends State<Sells> {
           .collection('pharmacies')
           .doc(pharmacyId)
           .collection('sells')
-          .doc(selectedDate)
+          .doc(currentDate)
           .collection(
           'dailySells') // Create a subcollection to store daily sells
           .doc(); // Automatically generate a unique document ID
@@ -299,11 +313,20 @@ class _SellsState extends State<Sells> {
         return yesterday.toString().substring(0, 10);
       case 'All':
         return '0';
-        default:
+      default:
         return '';
     }
   }
 
+// Helper functions for timestamp conversion and formatting
+  DateTime timestampToDate(Timestamp timestamp) {
+    return timestamp.toDate();
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    return '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}:${dateTime.second}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +349,7 @@ class _SellsState extends State<Sells> {
                 setState(() {
                   String selectedDate = _getDateForPeriod(value!);
                   _selectedTimePeriod = value;
-                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate); // Refresh sells data with selected date
+                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate);// Refresh sells data with selected date
                   }
                 );
               },
@@ -366,11 +389,11 @@ class _SellsState extends State<Sells> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Price: \$${sell['price'] ?? ''}'),
+                              Text('Price: IQD ${sell['price'] ?? ''}'),
                               Text('Qty: ${sell['quantity'] ?? ''}'),
                               Text('seller: ${sell['seller'] ?? ''}'),
-                              Text('expire: ${sell['expire'] ?? ''}'),
-                              Text('time: ${sell['time'] ?? ''}'),// Display the document ID here
+                              Text('expire: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(sell['expire']))}'),
+                              Text('time: ${formatTimestamp(sell['time'])}'),
                             ],
                           ),
                           onTap: () {
@@ -387,7 +410,7 @@ class _SellsState extends State<Sells> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _scanBarcode,
+        onPressed: scanBarcode,
         child: Icon(Icons.qr_code_scanner),
       ),
     );
