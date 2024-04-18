@@ -123,25 +123,11 @@ class _SignupState extends State<Signup> {
                         await _firestore.collection('users').doc(email).set({
                           'user': user,
                           'email': email,
+                          'name' : 'name',
+                          'pharmacyId' : ''
                           // Add more fields as needed
                         });
-                        // Create a subcollection named 'medicines' inside the user's document
-                       // await _firestore.collection('users').doc(email).collection('medicines').add({
-                        //  'brand': 'a',
-                       //   'cost': 0,
-                     //     'expire': '0',
-                      //    'name': 'a',
-                      //    'price': 0,
-                          // Add more fields as needed
-                    //    });
-                    //     await _firestore.collection('users').doc(email).collection('sales').add({
-                    //       'name': 'a',
-                    //       'pharmacist': 0,
-                    //       'price': '0',
-                    //       'date': 'a',
-                    //
-                    //       // Add more fields as needed
-                    //     });
+
                         print('User signed up and document created in Firestore.');
                       } catch (error) {
                         print('Error signing up: $error');

@@ -45,9 +45,9 @@ class _LoginState extends State<Login> {
         appBar: AppBar(
           title: const Text('Login Screen'),
         ),
-      //  body: _user != null ? _userInfo() : _loginForm(),
-       body: SingleChildScrollView(
-       child:  _loginForm(),
+        //  body: _user != null ? _userInfo() : _loginForm(),
+        body: SingleChildScrollView(
+          child: _loginForm(),
         ),
       ),
     );
@@ -64,7 +64,7 @@ class _LoginState extends State<Login> {
             child: Image.asset(
               'assets/pharmassist11.png',
               width: 100,
-                height: 100,
+              height: 100,
             ),
           ),
           Container(
@@ -108,20 +108,21 @@ class _LoginState extends State<Login> {
                   try {
                     var user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
-                     // Fetch pharmacyId from user document
-                        final userDataSnapshot = await FirebaseFirestore.instance
-                           .collection('users')
-                            .doc(email)
-                             .get();
-                           final pharmacyId = userDataSnapshot['pharmacyId'];
-                    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                    // Fetch pharmacyId from user document
+                    final userDataSnapshot = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(email)
+                        .get();
+                    final pharmacyId = userDataSnapshot['pharmacyId'];
+                    UserProvider userProvider = Provider.of<UserProvider>(
+                        context, listen: false);
                     userProvider.setUserId(email);
                     userProvider.setPharmacyId(pharmacyId);
                     // Pass user email to Dashbord widget
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardPage( ),
+                        builder: (context) => DashboardPage(),
                       ),
                     );
                   } catch (Error) {
@@ -131,7 +132,7 @@ class _LoginState extends State<Login> {
                         animType: AnimType.rightSlide,
                         title: 'Error',
                         desc: 'No user found for that email.')
-                      .show();
+                        .show();
                   }
                 },
               )),
@@ -164,7 +165,7 @@ class _LoginState extends State<Login> {
             child: SignInButton(
               Buttons.google,
               text: "Sign in with Google",
-              onPressed: _handleGoogleSinIn,
+              onPressed: _handleGoogleSignIn,
             ),
           ),
         ],
@@ -176,12 +177,52 @@ class _LoginState extends State<Login> {
     return const SizedBox();
   }
 
-  void _handleGoogleSinIn() {
+  void _handleGoogleSignIn() {
     try {
-      GoogleAuthProvider _GoogleAuthProvider = GoogleAuthProvider();
-      _auth.signInWithProvider(_GoogleAuthProvider);
+      GoogleAuthProvider _googleAuthProvider = GoogleAuthProvider();
+      _auth.signInWithProvider(_googleAuthProvider)
+          .then((UserCredential userCredential) async {
+        // Handle successful sign-in
+        User? user = userCredential.user;
+        if (user != null) {
+          // Retrieve the user's email
+          String? email = user.email;
+          final userDataSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(email)
+              .get();
+          final pharmacyId = userDataSnapshot['pharmacyId'];
+          UserProvider userProvider = Provider.of<UserProvider>(
+              context, listen: false);
+          userProvider.setUserId(email!);
+          userProvider.setPharmacyId(pharmacyId);
+          // Pass user email to Dashbord widget
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardPage(),
+            ),
+          );
+          if (email != null) {
+            // Do something with the email
+            print('User ${user.displayName} signed in with email: $email');
+          } else {
+            // Email is null
+            print('User signed in successfully, but email is null.');
+          }
+        } else {
+          // Handle sign-in failure
+          print('Sign-in failed. User is null.');
+        }
+      }).catchError((error) {
+        // Handle sign-in errors
+        print('Sign-in error: $error');
+      });
     } catch (error) {
-      print(error);
+      // Handle other errors that might occur
+      print('Error: $error');
     }
   }
+
 }
+
