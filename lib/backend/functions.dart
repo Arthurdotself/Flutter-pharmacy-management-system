@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
@@ -449,6 +450,46 @@ class CounterData {
 
   CounterData(this.date, this.count);
 }
+//-------------------------dashboard ------------------------------------------------------------
 
 
+Stream<QuerySnapshot> getTasksStream(BuildContext context) {
+  return FirebaseFirestore.instance.collection('users').doc(userEmail).collection('tasks').where('isCompleted', isEqualTo: false).snapshots();
+}
+
+Stream<QuerySnapshot> getCompletedTasksStream(BuildContext context) {
+  return FirebaseFirestore.instance.collection('users').doc(userEmail).collection('tasks').where('isCompleted', isEqualTo: true).snapshots();
+}
+class Task {
+  final String documentId; // Add this property to store the document ID
+  final String description;
+  final String title;
+
+  final bool isCompleted;
+
+  Task({
+    required this.documentId,
+    required this.description,
+    required this.title,
+    required this.isCompleted,
+  });
+}
+void toggleTaskCompletion(BuildContext context, Task task) async {
+  try {
+    CollectionReference tasksCollection = FirebaseFirestore.instance.collection('users').doc(userEmail).collection('tasks');
+
+    await tasksCollection.doc(task.documentId).update({
+      'isCompleted': !task.isCompleted,
+    });
+
+    if (kDebugMode) {
+      print('Task completion status updated successfully');
+    }
+  } catch (error) {
+    if (kDebugMode) {
+      print('Error updating task completion status: $error');
+    }
+  }
+}
+//------------------------- ExpiringExpired ------------------------------------------------------------
 

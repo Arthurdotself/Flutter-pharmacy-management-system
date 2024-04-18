@@ -9,7 +9,7 @@ import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:tugas1_login/main.dart';
 import 'package:tugas1_login/pages/setting.dart';
 import 'package:tugas1_login/pages/tasks.dart';
-import 'package:tugas1_login/pages/test.dart';
+import 'package:tugas1_login/pages/ExpiringExpired.dart';
 import 'package:tugas1_login/pages/patientProfile.dart';
 import '../backend/functions.dart';
 import 'package:intl/intl.dart';
@@ -37,6 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,10 +70,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Inventory(
-                            userEmail: userEmail,
-                            pharmacyId: pharmacyId,
-                          ),
+                          builder: (context) => Inventory(),
                         ),
                       );
                     },
@@ -83,6 +81,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: _buildDashboardItem(
                     title: 'Add\nSells',
                     icon: Icons.monetization_on,
+                    //iconColor: Colors.green.shade700,
                     future: getSellsCount(),
                     onTap: () {
                       sellscanBarcode(context);
@@ -94,11 +93,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: _buildDashboardItem(
                     title: 'Expiring & Expired',
                     icon: Icons.timer,
+                    // iconColor: Colors.orange.shade800,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TestNewThingsPage(),
+                          builder: (context) => ExpiringExpiredPage(),
                         ),
                       );
                     },
@@ -174,61 +174,59 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+
   Widget _buildDashboardItem({
     required String title,
     required IconData icon,
     Future<int>? future,
     required VoidCallback onTap,
+    Color iconColor = Colors.blue, // Default icon color
   }) {
     return FutureBuilder<int>(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text("Error: ${snapshot.error}");
-        } else {
-          int? itemCount = snapshot.data;
-          return GestureDetector(
-            onTap: onTap,
-            child: Container(
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    size: 50.0,
-                    color: Colors.blue.shade800,
-                  ),
-                  SizedBox(height: 10.0),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 5.0),
-                  Text(
-                    itemCount != null ? '$itemCount' : '',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+        int? itemCount = snapshot.data;
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(10.0),
             ),
-          );
-        }
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 50.0,
+                  color: iconColor, // Use specified icon color
+                ),
+                SizedBox(height: 10.0),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 5.0),
+                Text(
+                  itemCount != null ? '$itemCount' : '',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
+
+
 
   Widget _buildBarChart(List<Map<String, dynamic>> firebaseData) {
     // Convert Firebase data into a map of time and item counts
@@ -358,7 +356,7 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Inventory(userEmail: userEmail, pharmacyId: pharmacyId ),
+                        builder: (context) => Inventory( ),
                       ),
                     );
                   },
@@ -411,6 +409,7 @@ class NavBar extends StatelessWidget {
                   onTap: () {
                     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
                     userProvider.setUserId('');
+                    userProvider.setPharmacyId('');
                     //context.read<UserProvider>().signOut();
                     Navigator.pushReplacement(
                       context,

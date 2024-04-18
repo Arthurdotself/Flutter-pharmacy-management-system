@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-
-import 'package:provider/provider.dart';
-import 'package:tugas1_login/backend/user_provider.dart';
+import 'package:tugas1_login/backend/functions.dart';
 
 class Inventory extends StatefulWidget {
-  final String userEmail;
-  final String pharmacyId;
 
-  const Inventory({Key? key, required this.userEmail, required this.pharmacyId}) : super(key: key);
+  const Inventory({Key? key}) : super(key: key);
 
   @override
   _InventoryState createState() => _InventoryState();
@@ -52,7 +48,7 @@ class _InventoryState extends State<Inventory> {
     // Fetch pharmacyId from user document
     final userDataSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .doc(widget.userEmail)
+        .doc(userEmail)
         .get();
     final  pharmacyId = userDataSnapshot['pharmacyId'];
 
@@ -132,7 +128,7 @@ class _InventoryState extends State<Inventory> {
 
     final docRef = FirebaseFirestore.instance
         .collection('pharmacies')
-        .doc(widget.pharmacyId)
+        .doc(pharmacyId)
         .collection('medicines')
         .doc(scannedBarcode);
 
@@ -212,7 +208,7 @@ class _InventoryState extends State<Inventory> {
                 if (name.isNotEmpty) {
                   final pharmacySnapshot = await FirebaseFirestore.instance
                       .collection('users')
-                      .doc(widget.userEmail)
+                      .doc(userEmail)
                       .get();
 
                   final pharmacyId = pharmacySnapshot['pharmacyId'];

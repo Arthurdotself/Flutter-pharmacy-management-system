@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
-import '../backend/user_provider.dart';
+import '../backend/functions.dart';
 
-class TestNewThingsPage extends StatelessWidget {
+class ExpiringExpiredPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,8 +32,6 @@ class _ExpiredMedicinesListState extends State<ExpiredMedicinesList> {
   }
 
   Future<void> _fetchExpiredMedicines() async {
-    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-    String pharmacyId = userProvider.PharmacyId;
     try {
       // Query the Firestore collection for expired medicines
       QuerySnapshot expiredMedicinesSnapshot = await FirebaseFirestore.instance

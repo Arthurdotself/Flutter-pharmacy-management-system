@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-
+import '../backend/functions.dart';
 import '../backend/user_provider.dart';
 
 class TasksPage extends StatefulWidget {
@@ -68,7 +68,7 @@ class UnfinishedTasksPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             StreamBuilder(
-              stream: _getTasksStream(context),
+              stream: getTasksStream(context),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -109,11 +109,7 @@ class UnfinishedTasksPage extends StatelessWidget {
     );
   }
 
-  Stream<QuerySnapshot> _getTasksStream(BuildContext context) {
-    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-    String userId = userProvider.userId;
-    return FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').where('isCompleted', isEqualTo: false).snapshots();
-  }
+
 
   Future<void> createTaskDocument(BuildContext context) async {
     TextEditingController titleController = TextEditingController();
@@ -188,7 +184,7 @@ class CompletedTasksPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             StreamBuilder(
-              stream: _getCompletedTasksStream(context),
+              stream: getCompletedTasksStream(context),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -221,27 +217,6 @@ class CompletedTasksPage extends StatelessWidget {
       ),
     );
   }
-
-  Stream<QuerySnapshot> _getCompletedTasksStream(BuildContext context) {
-    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-    String userId = userProvider.userId;
-    return FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks').where('isCompleted', isEqualTo: true).snapshots();
-  }
-}
-
-class Task {
-  final String documentId; // Add this property to store the document ID
-  final String description;
-  final String title;
-
-  final bool isCompleted;
-
-  Task({
-    required this.documentId,
-    required this.description,
-    required this.title,
-    required this.isCompleted,
-  });
 }
 
 class TaskItem extends StatelessWidget {
@@ -297,25 +272,6 @@ class TaskItem extends StatelessWidget {
     );
   }
 
-  void toggleTaskCompletion(BuildContext context, Task task) async {
-    try {
-      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-      String userId = userProvider.userId;
-      CollectionReference tasksCollection = FirebaseFirestore.instance.collection('users').doc(userId).collection('tasks');
-
-      await tasksCollection.doc(task.documentId).update({
-        'isCompleted': !task.isCompleted,
-      });
-
-      if (kDebugMode) {
-        print('Task completion status updated successfully');
-      }
-    } catch (error) {
-      if (kDebugMode) {
-        print('Error updating task completion status: $error');
-      }
-    }
-  }
 
   void _showDescription(BuildContext context) {
     showDialog(
