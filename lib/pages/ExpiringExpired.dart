@@ -11,22 +11,24 @@ class ExpiringExpiredPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Expired Medicines'),
       ),
-      body: ExpiredMedicinesList(),
+      body: AnimatedExpiredMedicinesList(),
     );
   }
 }
 
-class ExpiredMedicinesList extends StatefulWidget {
+class AnimatedExpiredMedicinesList extends StatefulWidget {
   @override
-  _ExpiredMedicinesListState createState() => _ExpiredMedicinesListState();
+  _AnimatedExpiredMedicinesListState createState() => _AnimatedExpiredMedicinesListState();
 }
 
-class _ExpiredMedicinesListState extends State<ExpiredMedicinesList> {
-  List<Map<String, dynamic>> _expiredMedicines = [];
+class _AnimatedExpiredMedicinesListState extends State<AnimatedExpiredMedicinesList> {
+  late List<Map<String, dynamic>> _expiredMedicines;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with empty list
+    _expiredMedicines = [];
     // Call the function to get expired medicines from Firebase Firestore
     _fetchExpiredMedicines();
   }
@@ -39,7 +41,7 @@ class _ExpiredMedicinesListState extends State<ExpiredMedicinesList> {
           .doc(pharmacyId)
           .collection('medicines')
           .where('shipments', isLessThanOrEqualTo: [
-        {'expire': Timestamp.now()} // This ensures that at least one shipment has an expire field greater than or equal to current time
+        {'expire': Timestamp.now()}
       ])
           .get();
 
@@ -63,27 +65,77 @@ class _ExpiredMedicinesListState extends State<ExpiredMedicinesList> {
     return ListView.builder(
       itemCount: _expiredMedicines.length,
       itemBuilder: (context, index) {
-        return ExpiredMedicineListItem(medicine: _expiredMedicines[index]);
+        return AnimatedExpiredMedicineListItem(
+          medicine: _expiredMedicines[index],
+          delay: index * 0.1,
+        );
       },
     );
   }
 }
 
-class ExpiredMedicineListItem extends StatelessWidget {
+class AnimatedExpiredMedicineListItem extends StatefulWidget {
   final Map<String, dynamic> medicine;
+  final double delay;
 
-  ExpiredMedicineListItem({required this.medicine});
+  AnimatedExpiredMedicineListItem({required this.medicine, required this.delay});
+
+  @override
+  _AnimatedExpiredMedicineListItemState createState() => _AnimatedExpiredMedicineListItemState();
+}
+
+class _AnimatedExpiredMedicineListItemState extends State<AnimatedExpiredMedicineListItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+      // Add delay to animation
+      value: 0.1,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+    // Start the animation
+    _controller.forward();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> shipments = medicine['shipments'];
-    List<DateTime> expiryDates = [];
+    return SlideTransition(
+      position: _slideAnimation,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: _buildMedicineInfo(),
+      ),
+    );
+  }
 
+  Widget _buildMedicineInfo() {
+    List<dynamic> shipments = widget.medicine['shipments'];
+    List<DateTime> expiryDates = [];
     for (var shipment in shipments) {
       DateTime expiryDate = (shipment['expire'] as Timestamp).toDate();
       expiryDates.add(expiryDate);
     }
-
     Color indicatorColor = Colors.green; // Default color
     DateTime earliestExpiryDate = expiryDates.reduce((a, b) => a.isBefore(b) ? a : b);
     Duration timeDifference = earliestExpiryDate.difference(DateTime.now());
@@ -92,48 +144,43 @@ class ExpiredMedicineListItem extends StatelessWidget {
     } else if (timeDifference.isNegative) {
       indicatorColor = Colors.red; // Change color to red if already expired
     }
-
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      padding: EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Name: ${medicine['Name']}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Name: ${widget.medicine['Name']}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
               ),
-              SizedBox(height: 8.0),
-              Text('Quantity: ${medicine['quantity']}'),
-              SizedBox(height: 8.0),
-              Text('Expiring Date: ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
-              SizedBox(height: 8.0),
-              if (timeDifference.inDays >= 0)
-                Text('Expiring After ${timeDifference.inDays} Days'),
-              if (timeDifference.isNegative)
-                Text('Expired since ${timeDifference.inDays.abs()} Days'),
-            ],
-          ),
-          Container(
-            width: 20,
-            height: 110,
-            decoration: BoxDecoration(
-              color: indicatorColor,
-              borderRadius: BorderRadius.circular(5.0),
             ),
+            SizedBox(height: 8.0),
+            Text('Quantity: ${widget.medicine['quantity']}'),
+            SizedBox(height: 8.0),
+            Text('Expiring Date: ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
+            SizedBox(height: 8.0),
+            if (timeDifference.inDays >= 0) Text('Expiring After ${timeDifference.inDays} Days'),
+            if (timeDifference.isNegative) Text('Expired since ${timeDifference.inDays.abs()} Days'),
+          ],
+        ),
+        Container(
+          width: 20,
+          height: 110,
+          decoration: BoxDecoration(
+            color: indicatorColor,
+            borderRadius: BorderRadius.circular(5.0),
           ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

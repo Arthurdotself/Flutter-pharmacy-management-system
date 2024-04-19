@@ -38,7 +38,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -81,7 +80,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: _buildDashboardItem(
                     title: 'Add\nSells',
                     icon: Icons.monetization_on,
-                    //iconColor: Colors.green.shade700,
                     future: getSellsCount(),
                     onTap: () {
                       sellscanBarcode(context);
@@ -91,9 +89,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Expiring & Expired',
+                    title: 'Expiring & Expired\n',
                     icon: Icons.timer,
-                    // iconColor: Colors.orange.shade800,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -111,9 +108,8 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               children: [
                 Expanded(
-                  flex: 1,
                   child: _buildDashboardItem(
-                    title: 'Patient Profile',
+                    title: 'Patient Profile\n',
                     icon: Icons.account_circle,
                     onTap: () {
                       Navigator.push(
@@ -127,7 +123,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 SizedBox(width: 10.0),
                 Expanded(
-                  flex: 1,
                   child: _buildDashboardItem(
                     title: 'Tasks',
                     icon: Icons.assignment,
@@ -174,84 +169,39 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-
   Widget _buildDashboardItem({
     required String title,
     required IconData icon,
     Future<int>? future,
     required VoidCallback onTap,
-    Color iconColor = Colors.blue, // Default icon color
+    Color iconColor = Colors.blue,
   }) {
-    return FutureBuilder<int>(
+    return AnimatedDashboardItem(
+      title: title,
+      icon: icon,
       future: future,
-      builder: (context, snapshot) {
-        int? itemCount = snapshot.data;
-        return GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 50.0,
-                  color: iconColor, // Use specified icon color
-                ),
-                SizedBox(height: 10.0),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 5.0),
-                Text(
-                  itemCount != null ? '$itemCount' : '',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      onTap: onTap,
+      iconColor: iconColor,
     );
   }
 
-
-
   Widget _buildBarChart(List<Map<String, dynamic>> firebaseData) {
-    // Convert Firebase data into a map of time and item counts
     Map<String, int> itemCountByTime = {};
 
     firebaseData.forEach((data) {
-      // Extract the timestamp and convert it to a date string
       String time = DateFormat('EEE').format(data['time'].toDate());
 
-      // Print the timestamp and date string for debugging
-      print('Timestamp: ${data['time']}, Date: $time');
-
-      // Update the map with the count for the corresponding date
       itemCountByTime.update(
         time,
             (value) => value + 1,
         ifAbsent: () => 1,
       );
     });
-    // Convert the map into a list of DaySales
+
     List<DaySales> daySalesList = itemCountByTime.entries
         .map((entry) => DaySales(entry.key, entry.value))
         .toList();
 
-    // Define the series list using the converted data
     List<charts.Series<DaySales, String>> seriesList = [
       charts.Series(
         id: 'Sales',
@@ -262,7 +212,6 @@ class _DashboardPageState extends State<DashboardPage> {
       )
     ];
 
-    // Return the BarChart widget with the series list
     return charts.BarChart(
       seriesList,
       animate: true,
@@ -270,6 +219,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
+
 class DaySales {
   final String day;
   final int amount;
@@ -277,6 +227,114 @@ class DaySales {
   DaySales(this.day, this.amount);
 }
 
+class AnimatedDashboardItem extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final Future<int>? future;
+  final VoidCallback onTap;
+  final Color iconColor;
+
+  const AnimatedDashboardItem({
+    Key? key,
+    required this.title,
+    required this.icon,
+    this.future,
+    required this.onTap,
+    this.iconColor = Colors.blue,
+  }) : super(key: key);
+
+  @override
+  _AnimatedDashboardItemState createState() => _AnimatedDashboardItemState();
+}
+
+class _AnimatedDashboardItemState extends State<AnimatedDashboardItem> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Transform.translate(
+            offset: Offset(0.0, 50.0 * (1 - _animation.value)),
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                widget.icon,
+                size: 50.0,
+                color: widget.iconColor,
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 5.0),
+              if (widget.future != null)
+                FutureBuilder<int>(
+                  future: widget.future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasData) {
+                      return Text(
+                        '${snapshot.data}',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.black,
+                        ),
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
 
 void main() {
   runApp(MaterialApp(
@@ -339,15 +397,9 @@ class NavBar extends StatelessWidget {
                   title: Text('Home'),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DashboardPage( ),
-                      ),
-                    );
+                    
                   },
                 ),
-
                 ListTile(
                   leading: Icon(Icons.inventory_2_outlined),
                   title: Text('Inventory'),
@@ -356,12 +408,11 @@ class NavBar extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Inventory( ),
+                        builder: (context) => Inventory(),
                       ),
                     );
                   },
                 ),
-
                 ListTile(
                   leading: Icon(Icons.attach_money_outlined),
                   title: Text('Sells'),
@@ -410,7 +461,6 @@ class NavBar extends StatelessWidget {
                     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
                     userProvider.setUserId('');
                     userProvider.setPharmacyId('');
-                    //context.read<UserProvider>().signOut();
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

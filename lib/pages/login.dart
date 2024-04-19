@@ -16,10 +16,12 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   late String email;
   late String password;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   User? _user;
 
@@ -31,6 +33,17 @@ class _LoginState extends State<Login> {
         _user = event;
       });
     });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+    _animationController.forward();
   }
 
   @override
@@ -45,9 +58,11 @@ class _LoginState extends State<Login> {
         appBar: AppBar(
           title: const Text('Login Screen'),
         ),
-        //  body: _user != null ? _userInfo() : _loginForm(),
         body: SingleChildScrollView(
-          child: _loginForm(),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: _loginForm(),
+          ),
         ),
       ),
     );
@@ -97,45 +112,46 @@ class _LoginState extends State<Login> {
             ),
           ),
           Container(
-              height: 80,
-              padding: const EdgeInsets.all(20),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                ),
-                child: const Text('Log In'),
-                onPressed: () async {
-                  try {
-                    var user = await _auth.signInWithEmailAndPassword(
-                        email: email, password: password);
-                    // Fetch pharmacyId from user document
-                    final userDataSnapshot = await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(email)
-                        .get();
-                    final pharmacyId = userDataSnapshot['pharmacyId'];
-                    UserProvider userProvider = Provider.of<UserProvider>(
-                        context, listen: false);
-                    userProvider.setUserId(email);
-                    userProvider.setPharmacyId(pharmacyId);
-                    // Pass user email to Dashbord widget
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DashboardPage(),
-                      ),
-                    );
-                  } catch (Error) {
-                    AwesomeDialog(
-                        context: context,
-                        dialogType: DialogType.error,
-                        animType: AnimType.rightSlide,
-                        title: 'Error',
-                        desc: 'No user found for that email.')
-                        .show();
-                  }
-                },
-              )),
+            height: 80,
+            padding: const EdgeInsets.all(20),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              child: const Text('Log In'),
+              onPressed: () async {
+                try {
+                  var user = await _auth.signInWithEmailAndPassword(
+                      email: email, password: password);
+                  // Fetch pharmacyId from user document
+                  final userDataSnapshot = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(email)
+                      .get();
+                  final pharmacyId = userDataSnapshot['pharmacyId'];
+                  UserProvider userProvider = Provider.of<UserProvider>(
+                      context, listen: false);
+                  userProvider.setUserId(email);
+                  userProvider.setPharmacyId(pharmacyId);
+                  // Pass user email to Dashboard widget
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DashboardPage(),
+                    ),
+                  );
+                } catch (Error) {
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.error,
+                    animType: AnimType.rightSlide,
+                    title: 'Error',
+                    desc: 'No user found for that email.',
+                  ).show();
+                }
+              },
+            ),
+          ),
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -180,41 +196,44 @@ class _LoginState extends State<Login> {
   void _handleGoogleSignIn() {
     try {
       GoogleAuthProvider _googleAuthProvider = GoogleAuthProvider();
-      _auth.signInWithProvider(_googleAuthProvider)
-          .then((UserCredential userCredential) async {
-        // Handle successful sign-in
-        User? user = userCredential.user;
-        if (user != null) {
-          // Retrieve the user's email
-          String? email = user.email;
-          final userDataSnapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(email)
-              .get();
-          final pharmacyId = userDataSnapshot['pharmacyId'];
-          UserProvider userProvider = Provider.of<UserProvider>(
-              context, listen: false);
-          userProvider.setUserId(email!);
-          userProvider.setPharmacyId(pharmacyId);
-          // Pass user email to Dashbord widget
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPage(),
-            ),
-          );
-          if (email != null) {
-            // Do something with the email
-            print('User ${user.displayName} signed in with email: $email');
+      _auth.signInWithProvider(_googleAuthProvider).then(
+            (UserCredential userCredential) async {
+          // Handle successful sign-in
+          User? user = userCredential.user;
+          if (user != null) {
+            // Retrieve the user's email
+            String? email = user.email;
+            final userDataSnapshot = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(email)
+                .get();
+            final pharmacyId = userDataSnapshot['pharmacyId'];
+            UserProvider userProvider = Provider.of<UserProvider>(
+              context,
+              listen: false,
+            );
+            userProvider.setUserId(email!);
+            userProvider.setPharmacyId(pharmacyId);
+            // Pass user email to Dashboard widget
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DashboardPage(),
+              ),
+            );
+            if (email != null) {
+              // Do something with the email
+              print('User ${user.displayName} signed in with email: $email');
+            } else {
+              // Email is null
+              print('User signed in successfully, but email is null.');
+            }
           } else {
-            // Email is null
-            print('User signed in successfully, but email is null.');
+            // Handle sign-in failure
+            print('Sign-in failed. User is null.');
           }
-        } else {
-          // Handle sign-in failure
-          print('Sign-in failed. User is null.');
-        }
-      }).catchError((error) {
+        },
+      ).catchError((error) {
         // Handle sign-in errors
         print('Sign-in error: $error');
       });
@@ -223,6 +242,4 @@ class _LoginState extends State<Login> {
       print('Error: $error');
     }
   }
-
 }
-

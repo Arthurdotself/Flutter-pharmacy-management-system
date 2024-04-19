@@ -25,9 +25,7 @@ class NotesHomePage extends StatefulWidget {
 }
 
 class _NotesHomePageState extends State<NotesHomePage> {
-  List<Note> _notes = [
-
-  ];
+  List<Note> _notes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +45,10 @@ class _NotesHomePageState extends State<NotesHomePage> {
                 ),
               );
             },
-            child: NoteCard(note: _notes[index]),
+            child: AnimatedNoteCard(
+              note: _notes[index],
+              index: index,
+            ),
           );
         },
       ),
@@ -85,6 +86,52 @@ class Note {
     required this.content,
     required this.category,
   });
+}
+
+class AnimatedNoteCard extends StatefulWidget {
+  final Note note;
+  final int index;
+
+  const AnimatedNoteCard({Key? key, required this.note, required this.index}) : super(key: key);
+
+  @override
+  _AnimatedNoteCardState createState() => _AnimatedNoteCardState();
+}
+
+class _AnimatedNoteCardState extends State<AnimatedNoteCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _offsetAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+    _offsetAnimation = Tween<Offset>(begin: Offset(0.0, -0.5), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: SlideTransition(
+        position: _offsetAnimation,
+        child: NoteCard(note: widget.note),
+      ),
+    );
+  }
 }
 
 class NoteCard extends StatelessWidget {

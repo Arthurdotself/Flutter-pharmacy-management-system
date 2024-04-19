@@ -10,13 +10,31 @@ class Signup extends StatefulWidget {
   State<Signup> createState() => _SignupState();
 }
 
-class _SignupState extends State<Signup> {
+class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
   late String user;
   late String email;
   late String password;
   late String password0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+    _animationController.forward();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,129 +49,142 @@ class _SignupState extends State<Signup> {
           title: const Text('SignUp Screen'),
         ),
         body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 50),
-                child: Image.asset(
-                  'assets/pharmassist11.png',
-                  width: 100,
-                  height: 100,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: TextField(
-                  onChanged: (value) {
-                    user = value;
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(90.0),
-                    ),
-                    labelText: 'Username',
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: TextField(
-                  onChanged: (value) {
-                    email = value;
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(90.0),
-                    ),
-                    labelText: 'Email',
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: TextField(
-                  onChanged: (value) {
-                    password = value;
-                  },
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(90.0),
-                    ),
-                    labelText: 'Create Password',
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: TextField(
-                  onChanged: (value) {
-                    password0 = value;
-                  },
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(90.0),
-                    ),
-                    labelText: 'Re-Enter Password',
-                  ),
-                ),
-              ),
-              Container(
-                height: 80,
-                padding: const EdgeInsets.all(20),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                  ),
-                  child: const Text('SignUp'),
-                  onPressed: () async {
-                    if (password == password0 &&
-                        email.isNotEmpty &&
-                        password.isNotEmpty &&
-                        user.isNotEmpty) {
-                      try {
-                        // Create user in Firebase Authentication
-                        var newUser = await _auth.createUserWithEmailAndPassword(
-                            email: email, password: password);
-
-                        // Create a new document in Firestore with the email as document ID
-                        await _firestore.collection('users').doc(email).set({
-                          'user': user,
-                          'email': email,
-                          'name' : 'name',
-                          'pharmacyId' : ''
-                          // Add more fields as needed
-                        });
-
-                        print('User signed up and document created in Firestore.');
-                      } catch (error) {
-                        print('Error signing up: $error');
-                      }
-                    } else {
-                      // Handle validation errors
-                    }
-                  },
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login()),
-                  );
-                },
-                child: Text(
-                  'LogIn',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ),
-            ],
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: _buildSignupForm(),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildSignupForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 50),
+          child: Image.asset(
+            'assets/pharmassist11.png',
+            width: 100,
+            height: 100,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: TextField(
+            onChanged: (value) {
+              user = value;
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(90.0),
+              ),
+              labelText: 'Username',
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: TextField(
+            onChanged: (value) {
+              email = value;
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(90.0),
+              ),
+              labelText: 'Email',
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: TextField(
+            onChanged: (value) {
+              password = value;
+            },
+            obscureText: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(90.0),
+              ),
+              labelText: 'Create Password',
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: TextField(
+            onChanged: (value) {
+              password0 = value;
+            },
+            obscureText: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(90.0),
+              ),
+              labelText: 'Re-Enter Password',
+            ),
+          ),
+        ),
+        Container(
+          height: 80,
+          padding: const EdgeInsets.all(20),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(50),
+            ),
+            child: const Text('SignUp'),
+            onPressed: () async {
+              if (password == password0 &&
+                  email.isNotEmpty &&
+                  password.isNotEmpty &&
+                  user.isNotEmpty) {
+                try {
+                  // Create user in Firebase Authentication
+                  var newUser = await _auth.createUserWithEmailAndPassword(
+                      email: email, password: password);
+
+                  // Create a new document in Firestore with the email as document ID
+                  await _firestore.collection('users').doc(email).set({
+                    'user': user,
+                    'email': email,
+                    'name': 'name',
+                    'pharmacyId': ''
+                    // Add more fields as needed
+                  });
+
+                  print('User signed up and document created in Firestore.');
+                } catch (error) {
+                  print('Error signing up: $error');
+                }
+              } else {
+                // Handle validation errors
+              }
+            },
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          },
+          child: Text(
+            'LogIn',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }

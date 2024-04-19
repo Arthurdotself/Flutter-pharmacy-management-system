@@ -48,10 +48,57 @@ class _TasksPageState extends State<TasksPage> with SingleTickerProviderStateMix
       body: TabBarView(
         controller: _tabController,
         children: const [
-          UnfinishedTasksPage(),
-          CompletedTasksPage(),
+          FadeInAnimation(child: UnfinishedTasksPage()),
+          FadeInAnimation(child: CompletedTasksPage()),
         ],
       ),
+    );
+  }
+}
+
+class FadeInAnimation extends StatefulWidget {
+  final Widget child;
+
+  const FadeInAnimation({Key? key, required this.child}) : super(key: key);
+
+  @override
+  _FadeInAnimationState createState() => _FadeInAnimationState();
+}
+
+class _FadeInAnimationState extends State<FadeInAnimation> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Transform.scale(
+            scale: _animation.value,
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 }
@@ -75,23 +122,23 @@ class UnfinishedTasksPage extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  List<Widget> taskItems = snapshot.data!.docs.map((doc) {
-                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: TaskItem(
-                        task: Task(
-                          documentId: doc.id,
-                          isCompleted: data['isCompleted'],
-                          title: data['title'],
-                          description: data['description'],
-                        ),
-                      ),
-                    );
-                  }).toList();
-
                   return Column(
-                    children: taskItems,
+                    children: snapshot.data!.docs.map((doc) {
+                      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                      return FadeInAnimation(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: TaskItem(
+                            task: Task(
+                              documentId: doc.id,
+                              isCompleted: data['isCompleted'],
+                              title: data['title'],
+                              description: data['description'],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   );
                 }
               },
@@ -108,8 +155,6 @@ class UnfinishedTasksPage extends StatelessWidget {
       ),
     );
   }
-
-
 
   Future<void> createTaskDocument(BuildContext context) async {
     TextEditingController titleController = TextEditingController();
@@ -191,23 +236,23 @@ class CompletedTasksPage extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  List<Widget> taskItems = snapshot.data!.docs.map((doc) {
-                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: TaskItem(
-                        task: Task(
-                          documentId: doc.id,
-                          isCompleted: data['isCompleted'],
-                          title: data['title'],
-                          description: data['description'],
-                        ),
-                      ),
-                    );
-                  }).toList();
-
                   return Column(
-                    children: taskItems,
+                    children: snapshot.data!.docs.map((doc) {
+                      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                      return FadeInAnimation(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: TaskItem(
+                            task: Task(
+                              documentId: doc.id,
+                              isCompleted: data['isCompleted'],
+                              title: data['title'],
+                              description: data['description'],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   );
                 }
               },
@@ -271,7 +316,6 @@ class TaskItem extends StatelessWidget {
       ),
     );
   }
-
 
   void _showDescription(BuildContext context) {
     showDialog(

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../backend/functions.dart';
 
-
 class Sells extends StatefulWidget {
   final String userEmail;
   final String pharmacyId;
@@ -16,53 +15,71 @@ class Sells extends StatefulWidget {
 
 }
 
-class _SellsState extends State<Sells> {
+class _SellsState extends State<Sells> with TickerProviderStateMixin {
   String _selectedTimePeriod = 'Today';
   late Future<List<Map<String, dynamic>>> _sellsDataFuture;
   List<dynamic> shipments = []; // Declare shipments list at class level
+  late AnimationController _animationController;
+  late Animation<double> _fadeInAnimation;
 
   @override
   void initState() {
     setUserEmail(context);
     super.initState();
     _sellsDataFuture = fetchSellsData();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+
+    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _animationController.forward();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sells'),
+        title: FadeTransition(
+          opacity: _fadeInAnimation,
+          child: const Text('Sells'),
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: DropdownButtonFormField<String>(
-              value: _selectedTimePeriod,
-              decoration: const InputDecoration(
-                labelText: 'Time Period',
-                border: OutlineInputBorder(),
+            child: FadeTransition(
+              opacity: _fadeInAnimation,
+              child: DropdownButtonFormField<String>(
+                value: _selectedTimePeriod,
+                decoration: const InputDecoration(
+                  labelText: 'Time Period',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    String selectedDate = getDateForPeriod(value!);
+                    _selectedTimePeriod = value;
+                    _sellsDataFuture = fetchSellsData(selectedDate: selectedDate);// Refresh sells data with selected date
+                  });
+                },
+                items: [
+                  'Today',
+                  'Yesterday',
+                  'All', // Add 'All' option
+                ].map((period) {
+                  return DropdownMenuItem(
+                    value: period,
+                    child: Text(period),
+                  );
+                }).toList(),
               ),
-              onChanged: (value) {
-                setState(() {
-                  String selectedDate = getDateForPeriod(value!);
-                  _selectedTimePeriod = value;
-                  _sellsDataFuture = fetchSellsData(selectedDate: selectedDate);// Refresh sells data with selected date
-                  }
-                );
-              },
-              items: [
-                'Today',
-                'Yesterday',
-                'All', // Add 'All' option
-              ].map((period) {
-                return DropdownMenuItem(
-                  value: period,
-                  child: Text(period),
-                );
-              }).toList(),
             ),
           ),
           Expanded(
@@ -83,21 +100,24 @@ class _SellsState extends State<Sells> {
                       itemCount: sellsData.length,
                       itemBuilder: (context, index) {
                         Map<String, dynamic> sell = sellsData[index];
-                        return ListTile(
-                          title: Text(sell['productName'] ?? ''),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Price: IQD ${sell['price'] ?? ''}'),
-                              Text('Qty: ${sell['quantity'] ?? ''}'),
-                              Text('seller: ${sell['seller'] ?? ''}'),
-                              Text('expire: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(sell['expire']))}'),
-                              Text('time: ${formatTimestamp(sell['time'])}'),
-                            ],
+                        return FadeTransition(
+                          opacity: _fadeInAnimation,
+                          child: ListTile(
+                            title: Text(sell['productName'] ?? ''),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Price: IQD ${sell['price'] ?? ''}'),
+                                Text('Qty: ${sell['quantity'] ?? ''}'),
+                                Text('seller: ${sell['seller'] ?? ''}'),
+                                Text('expire: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(sell['expire']))}'),
+                                Text('time: ${formatTimestamp(sell['time'])}'),
+                              ],
+                            ),
+                            onTap: () {
+                              // Add functionality for tapping on a sold product if needed
+                            },
                           ),
-                          onTap: () {
-                            // Add functionality for tapping on a sold product if needed
-                          },
                         );
                       },
                     );
