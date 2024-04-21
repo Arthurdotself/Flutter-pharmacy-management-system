@@ -42,7 +42,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Dashboard',
+          (getTranslations()['dashboard']!),
           style: TextStyle(
             fontSize: 20.0,
             fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Medicines\n',
+                    title: (getTranslations()['medicines']!),
                     icon: Icons.local_pharmacy,
                     future: _medicinesCountFuture,
                     onTap: () {
@@ -78,7 +78,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Add\nSells',
+                    title: (getTranslations()['add_sells']!),
                     icon: Icons.monetization_on,
                     future: getSellsCount(),
                     onTap: () {
@@ -89,7 +89,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Expiring & Expired\n',
+                    title: (getTranslations()['expiring_expired']!),
                     icon: Icons.timer,
                     onTap: () {
                       Navigator.push(
@@ -109,7 +109,7 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Patient Profile\n',
+                    title: (getTranslations()['patient_profile']!),
                     icon: Icons.account_circle,
                     onTap: () {
                       Navigator.push(
@@ -124,7 +124,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(width: 10.0),
                 Expanded(
                   child: _buildDashboardItem(
-                    title: 'Tasks',
+                    title: (getTranslations()['tasks']!),
                     icon: Icons.assignment,
                     future: countTasks(context),
                     onTap: () {
@@ -142,7 +142,7 @@ class _DashboardPageState extends State<DashboardPage> {
             SizedBox(height: 20.0),
             // Third section (Bar chart)
             Text(
-              'Sells of Last 7 Days',
+              (getTranslations()['sells_of_last_7_days']!),
               style: TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
@@ -394,7 +394,7 @@ class NavBar extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(Icons.home_outlined),
-                  title: Text('Home'),
+                  title: Text(getTranslations()['home']!),
                   onTap: () {
                     Navigator.pop(context);
                     
@@ -402,7 +402,7 @@ class NavBar extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(Icons.inventory_2_outlined),
-                  title: Text('Inventory'),
+                  title: Text(getTranslations()['inventory']!),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -415,7 +415,7 @@ class NavBar extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(Icons.attach_money_outlined),
-                  title: Text('Sells'),
+                  title: Text(getTranslations()['sells']!),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -428,7 +428,7 @@ class NavBar extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(Icons.note_outlined),
-                  title: Text('Notes'),
+                  title: Text(getTranslations()['notes']!),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -442,7 +442,7 @@ class NavBar extends StatelessWidget {
                 Divider(),
                 ListTile(
                   leading: Icon(Icons.settings),
-                  title: Text('Settings'),
+                  title: Text(getTranslations()['settings']!),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -456,7 +456,7 @@ class NavBar extends StatelessWidget {
                 Divider(),
                 ListTile(
                   leading: Icon(Icons.logout),
-                  title: Text('Logout'),
+                  title: Text(getTranslations()['logout']!),
                   onTap: () {
                     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
                     userProvider.setUserId('');

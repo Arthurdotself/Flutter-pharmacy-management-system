@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugas1_login/pages/login.dart';
 
+import '../backend/functions.dart';
+
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
 
@@ -46,7 +48,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('SignUp Screen'),
+          title:  Text(getTranslations()['sign_up_screen']!),
         ),
         body: Center(
           child: FadeTransition(
@@ -81,7 +83,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: 'Username',
+              labelText: getTranslations()['username']!,
             ),
           ),
         ),
@@ -95,7 +97,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: 'Email',
+              labelText: getTranslations()['email']!,
             ),
           ),
         ),
@@ -110,7 +112,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: 'Create Password',
+              labelText: getTranslations()['create_password']!,
             ),
           ),
         ),
@@ -125,7 +127,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: 'Re-Enter Password',
+              labelText: getTranslations()['re_enter_password']!,
             ),
           ),
         ),
@@ -136,7 +138,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
             ),
-            child: const Text('SignUp'),
+            child:  Text(getTranslations()['sign_up']!),
             onPressed: () async {
               if (password == password0 &&
                   email.isNotEmpty &&
@@ -174,7 +176,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
             );
           },
           child: Text(
-            'LogIn',
+            getTranslations()['log_in']!,
             style: TextStyle(color: Colors.grey[600]),
           ),
         ),

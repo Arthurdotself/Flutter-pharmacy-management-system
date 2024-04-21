@@ -46,7 +46,7 @@ class _SellsState extends State<Sells> with TickerProviderStateMixin {
       appBar: AppBar(
         title: FadeTransition(
           opacity: _fadeInAnimation,
-          child: const Text('Sells'),
+          child:  Text(getTranslations()['sells']!),
         ),
       ),
       body: Column(
@@ -58,8 +58,8 @@ class _SellsState extends State<Sells> with TickerProviderStateMixin {
               opacity: _fadeInAnimation,
               child: DropdownButtonFormField<String>(
                 value: _selectedTimePeriod,
-                decoration: const InputDecoration(
-                  labelText: 'Time Period',
+                decoration:  InputDecoration(
+                  labelText: getTranslations()['time_period']!,
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) {
@@ -94,7 +94,7 @@ class _SellsState extends State<Sells> with TickerProviderStateMixin {
                   List<Map<String, dynamic>> sellsData = snapshot.data ?? [];
                   if (sellsData.isEmpty) {
                     return Center(child: Text(
-                        "No sells data found for $_selectedTimePeriod"));
+                        getTranslations()['no_sells_data_found_for']!+"$_selectedTimePeriod"));
                   } else {
                     return ListView.builder(
                       itemCount: sellsData.length,
@@ -107,11 +107,11 @@ class _SellsState extends State<Sells> with TickerProviderStateMixin {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Price: IQD ${sell['price'] ?? ''}'),
-                                Text('Qty: ${sell['quantity'] ?? ''}'),
-                                Text('seller: ${sell['seller'] ?? ''}'),
-                                Text('expire: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(sell['expire']))}'),
-                                Text('time: ${formatTimestamp(sell['time'])}'),
+                                Text(getTranslations()['price']!+': ${sell['price'] ?? ''}'),
+                                Text(getTranslations()['quantity']!+': ${sell['quantity'] ?? ''}'),
+                                Text(getTranslations()['seller']!+': ${sell['seller'] ?? ''}'),
+                                Text(getTranslations()['expire']!+': ${DateFormat('yyyy-MM-dd').format(DateTime.parse(sell['expire']))}'),
+                                Text(getTranslations()['time']!+': ${formatTimestamp(sell['time'])}'),
                               ],
                             ),
                             onTap: () {

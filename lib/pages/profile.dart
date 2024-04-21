@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase authentication
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:tugas1_login/backend/user_provider.dart'; // Import your UserProvider
+import 'package:tugas1_login/backend/user_provider.dart';
+
+import '../backend/functions.dart'; // Import your UserProvider
 
 class EditProfilePage extends StatefulWidget {
   @override
@@ -65,7 +67,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: Text(getTranslations()['edit_profile']!),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -74,7 +76,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: getTranslations()['name']!),
               enabled: true,
             ),
             SizedBox(height: 16.0),
@@ -83,7 +85,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 Expanded(
                   child: TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(labelText: getTranslations()['email']!),
                     enabled: false,
                   ),
                 ),
@@ -104,21 +106,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Email updated successfully!'),
+                              content: Text(getTranslations()['email_updated_successfully']!),
                             ),
                           );
                         }
                       } catch (error) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Error updating email: $error'),
+                            content: Text(getTranslations()['error_updating_email']!+': $error'),
                             backgroundColor: Colors.red,
                           ),
                         );
                       }
                     }
                   },
-                  child: Text('Change Email'),
+                  child: Text(getTranslations()['change_email']!),
                 ),
                 SizedBox(width: 16.0),
 
@@ -131,7 +133,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: TextField(
                     controller: _searchPharmacyMode ? _searchController : _bioController,
                     decoration: InputDecoration(
-                      labelText: _searchPharmacyMode ? 'Search Pharmacy' : 'Pharmacy Name',
+                      labelText: _searchPharmacyMode ? getTranslations()['search_pharmacy']! : getTranslations()['pharmacy_name']!,
                     ),
                     enabled: _searchPharmacyMode, // Set enabled based on _searchPharmacyMode
                     onChanged: _searchPharmacyMode ? _filterPharmacies : null,
@@ -145,7 +147,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   _searchController.clear(); // Clear search query
                 });
               },
-              child: Text('Change Pharmacy'),
+              child: Text(getTranslations()['change_pharmacy']!),
             ),
             SizedBox(height: 16.0),
             Visibility(
@@ -176,7 +178,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: Text(getTranslations()['save']!),
             ),
           ],
         ),
@@ -193,13 +195,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Profile updated successfully!'),
+          content: Text(getTranslations()['email_updated_successfully']!),
         ),
       );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error updating profile: $error'),
+          content: Text(getTranslations()['error_updating_email']!+': $error'),
           backgroundColor: Colors.red,
         ),
       );
@@ -212,23 +214,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Re-enter Your Password'),
+          title: Text(getTranslations()['re_enter_password']!),
           content: TextField(
             obscureText: true,
-            decoration: InputDecoration(labelText: 'Password'),
+            decoration: InputDecoration(labelText: getTranslations()['password']!),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: Text(getTranslations()['cancel']!),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, 'password');
               },
-              child: Text('Confirm'),
+              child: Text(getTranslations()['confirm']!),
             ),
           ],
         );

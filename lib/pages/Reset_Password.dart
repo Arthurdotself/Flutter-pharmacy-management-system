@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:tugas1_login/pages/login.dart';
 
+import '../backend/functions.dart';
+
 class Reset_Password extends StatefulWidget {
   const Reset_Password({Key? key}) : super(key: key);
 
@@ -44,7 +46,7 @@ class _Reset_PasswordState extends State<Reset_Password>
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Password Reset'),
+          title:  Text(getTranslations()['password_reset']!),
         ),
         body: Center(
           child: FadeTransition(
@@ -71,8 +73,8 @@ class _Reset_PasswordState extends State<Reset_Password>
         ),
         Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-          child: const Text(
-              'Enter the Email associated with your account for which you forgot your password.'),
+          child:  Text(
+          getTranslations()['enter_email_for_password_reset']!),
         ),
         Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -84,7 +86,7 @@ class _Reset_PasswordState extends State<Reset_Password>
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: 'Email',
+              labelText:  getTranslations()['email']!,
             ),
           ),
         ),
@@ -95,13 +97,13 @@ class _Reset_PasswordState extends State<Reset_Password>
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
             ),
-            child: const Text('send a reset password to your email'),
+            child:  Text( getTranslations()['send_reset_password_email']!),
             onPressed: () async {
               try {
                 if (email.isEmpty) {
-                  msg = "Enter your email";
+                  msg = getTranslations()['enter_email']!;
                 } else if (email.isNotEmpty) {
-                  msg = 'No Account found for that email.';
+                  msg = getTranslations()['no_account_found']!;
                 }
                 var user =
                 await _auth.sendPasswordResetEmail(email: email);
@@ -110,9 +112,9 @@ class _Reset_PasswordState extends State<Reset_Password>
                   context: context,
                   dialogType: DialogType.success,
                   animType: AnimType.bottomSlide,
-                  title: 'Success',
+                  title: getTranslations()['success']!,
                   desc:
-                  'Password reset email sent successfully.\nCheck your email.',
+                  getTranslations()['password_reset_email_sent']!,
                   btnOkOnPress: () {
                     // Navigate to another page
                     Navigator.push(
@@ -127,7 +129,7 @@ class _Reset_PasswordState extends State<Reset_Password>
                   context: context,
                   dialogType: DialogType.error,
                   animType: AnimType.rightSlide,
-                  title: 'Error',
+                  title: getTranslations()['error']!,
                   desc: msg,
                 ).show();
               }

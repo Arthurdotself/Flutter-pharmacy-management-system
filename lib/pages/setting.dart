@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tugas1_login/pages/profile.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../backend/functions.dart';
+import '../backend/user_provider.dart';
+import 'package:tugas1_login/main.dart';
 
 class LanguageSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Language'),
+        title: Text(getTranslations()['select_language']!),
       ),
       body: ListView(
         children: [
@@ -17,35 +20,42 @@ class LanguageSelectionPage extends StatelessWidget {
             onTap: () {
               // Set selected language to English
               // You can implement language selection logic here
-              Navigator.pop(context); // Close language selection page
+              UserProvider userProvider = Provider.of<UserProvider>(
+                  context, listen: false);
+              userProvider.setLangKey('en');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyApp()),
+              );
+              // Close language selection page
             },
           ),
           ListTile(
-            title: Text('Kurdish'),
-            subtitle: Text(
-              'Under Construction',
-              style: TextStyle(
-                color: Colors.red, // Or any other color you prefer
-              ),
-            ),
+            title: Text('كوردى'),
             onTap: () {
               // Set selected language to Spanish
               // You can implement language selection logic here
-              //Navigator.pop(context); // Close language selection page
+              UserProvider userProvider = Provider.of<UserProvider>(
+                  context, listen: false);
+              userProvider.setLangKey('ku');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyApp()),
+              );
             },
           ),
           ListTile(
-            title: Text('Arabic'),
-            subtitle: Text(
-              'Under Construction',
-              style: TextStyle(
-                color: Colors.red, // Or any other color you prefer
-              ),
-            ),
+            title: Text('عربي'),
             onTap: () {
               // Set selected language to Spanish
               // You can implement language selection logic here
-              //Navigator.pop(context); // Close language selection page
+              UserProvider userProvider = Provider.of<UserProvider>(
+                  context, listen: false);
+              userProvider.setLangKey('ar');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyApp()),
+              );
             },
           ),
           // Add more languages as needed
@@ -85,7 +95,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Password'),
+        title: Text(getTranslations()['change_password']!),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -93,38 +103,38 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current Password',
+              getTranslations()['current_password']!,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextField(
               controller: _currentPasswordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'Enter your current password',
+                hintText:getTranslations()['enter_current_password']!,
               ),
             ),
             SizedBox(height: 16),
             Text(
-              'New Password',
+              getTranslations()['new_password']!,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextField(
               controller: _newPasswordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'Enter your new password',
+                hintText:getTranslations()['enter_new_password']!,
               ),
             ),
             SizedBox(height: 16),
             Text(
-              'Confirm New Password',
+              getTranslations()['confirm_new_password']!,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextField(
               controller: _confirmPasswordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'Confirm your new password',
+                hintText: getTranslations()['confirm_new_password_description']!,
               ),
             ),
             SizedBox(height: 16),
@@ -132,7 +142,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               onPressed: () {
                 _handleChangePassword();
               },
-              child: Text('Save Changes'),
+              child: Text(getTranslations()['save_changes']!),
             ),
           ],
         ),
@@ -147,13 +157,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
     // Validate password fields
     if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      _showSnackBar('Please fill in all fields');
+      _showSnackBar(getTranslations()['fill_all_fields']!);
       return;
     }
 
     // Check if new password matches the confirm password
     if (newPassword != confirmPassword) {
-      _showSnackBar('New password and confirm password do not match');
+      _showSnackBar(getTranslations()['passwords_do_not_match']!);
       return;
     }
 
@@ -164,7 +174,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     _newPasswordController.clear();
     _confirmPasswordController.clear();
 
-    _showSnackBar('Password changed successfully');
+    _showSnackBar(getTranslations()['password_changed_successfully']!);
   }
 
   void _showSnackBar(String message) {
@@ -182,66 +192,66 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text(getTranslations()['settings']!),
       ),
       body: ListView(
         children: [
-          _buildHeader('Account'),
-          _buildListItem(Icons.person, 'Edit Profile', () {
+          _buildHeader(getTranslations()['account']!),
+          _buildListItem(Icons.person,getTranslations()['edit_profile']! , () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => EditProfilePage()),
             );
           }),
 
-          _buildListItem(Icons.lock, 'Change Password', () {
+          _buildListItem(Icons.lock,getTranslations()['change_password']!, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ChangePasswordPage()),
             );
           }),
           _buildDivider(),
-          _buildHeader('Notifications'),
-          _buildSwitchListItem('Receive Notifications', true, (bool value) {
+          _buildHeader(getTranslations()['notifications']!),
+          _buildSwitchListItem(getTranslations()['receive_notifications']!, true, (bool value) {
             // Handle switch value change
           }),
           _buildDivider(),
-          _buildHeader('App Settings'),
-          _buildListItem(Icons.language, 'Language', () {
+          _buildHeader(getTranslations()['app_settings']!),
+          _buildListItem(Icons.language, getTranslations()['language']!, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => LanguageSelectionPage()), // Navigate to LanguageSelectionPage
             );
           }),
           _buildDivider(),
-          _buildHeader('Support'),
-          _buildListItem(Icons.help, 'Help & Feedback', () {
+          _buildHeader(getTranslations()['support']!),
+          _buildListItem(Icons.help, getTranslations()['help_and_feedback']!, () {
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('Help & Feedback'),
+                  title: Text(getTranslations()['help_and_feedback']!),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
                         leading: Icon(Icons.contact_support),
-                        title: Text('Contact Support'),
+                        title: Text(getTranslations()['contact_support']!),
                         onTap: () {
                           _contactSupport(context);
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.bug_report),
-                        title: Text('Report an Issue'),
+                        title: Text(getTranslations()['report_an_issue']!),
                         onTap: () {
                           // Implement report issue functionality
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.feedback),
-                        title: Text('Provide Feedback'),
+                        title: Text(getTranslations()['provide_feedback']!),
                         onTap: () {
                           // Implement feedback functionality
                         },
@@ -252,7 +262,7 @@ class SettingsPage extends StatelessWidget {
               },
             );
           }),
-          _buildListItem(Icons.info, 'About', () {
+          _buildListItem(Icons.info, getTranslations()['about']! , () {
             showAboutDialog(
               context: context,
               applicationName: 'PharmAssist',
@@ -273,7 +283,7 @@ class SettingsPage extends StatelessWidget {
             );
           }),
           _buildDivider(),
-          _buildListItem(Icons.exit_to_app, 'Log Out', () {
+          _buildListItem(Icons.exit_to_app, getTranslations()['log_out']!, () {
             // Implement log out functionality
           }, color: Colors.red),
         ],

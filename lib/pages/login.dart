@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugas1_login/pages/dashboard.dart';
+import '../backend/functions.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -28,6 +29,8 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    setUserEmail(context);
+    getTranslations();
     _auth.authStateChanges().listen((event) {
       setState(() {
         _user = event;
@@ -47,7 +50,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {setUserEmail(context);
     return MaterialApp(
       title: 'PMS',
       theme: ThemeData(
@@ -56,7 +59,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Login Screen'),
+          title:  Text(getTranslations()['login_screen']!),
         ),
         body: SingleChildScrollView(
           child: FadeTransition(
@@ -68,7 +71,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _loginForm() {
+  Widget _loginForm() { setUserEmail(context);
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -92,7 +95,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(90.0),
                 ),
-                labelText: 'Email',
+                labelText: getTranslations()['email']!,
               ),
             ),
           ),
@@ -107,7 +110,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(90.0),
                 ),
-                labelText: 'Password',
+                labelText: getTranslations()['login_screen']!,
               ),
             ),
           ),
@@ -118,7 +121,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
               ),
-              child: const Text('Log In'),
+              child:  Text(getTranslations()['log_in']!),
               onPressed: () async {
                 try {
                   var user = await _auth.signInWithEmailAndPassword(
@@ -145,8 +148,8 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                     context: context,
                     dialogType: DialogType.error,
                     animType: AnimType.rightSlide,
-                    title: 'Error',
-                    desc: 'No user found for that email.',
+                    title: getTranslations()['error']!,
+                    desc: getTranslations()['user_not_found']!,
                   ).show();
                 }
               },
@@ -160,7 +163,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
               );
             },
             child: Text(
-              'Forgot Password?',
+              getTranslations()['forgot_password']!,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),
@@ -172,7 +175,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
               );
             },
             child: Text(
-              'Sign Up',
+              getTranslations()['sign_up']!,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),
@@ -180,7 +183,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
             height: 50,
             child: SignInButton(
               Buttons.google,
-              text: "Sign in with Google",
+              text: getTranslations()['sign_in_with_google']!,
               onPressed: _handleGoogleSignIn,
             ),
           ),

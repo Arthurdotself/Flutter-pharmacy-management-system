@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../backend/functions.dart';
+
 void main() {
   runApp(NotesPage());
 }
@@ -8,7 +10,7 @@ class NotesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Samsung Notes',
+      title: 'Notes',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -31,7 +33,7 @@ class _NotesHomePageState extends State<NotesHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
+        title: Text(getTranslations()['notes']!),
       ),
       body: ListView.builder(
         itemCount: _notes.length,
@@ -66,7 +68,7 @@ class _NotesHomePageState extends State<NotesHomePage> {
             });
           }
         },
-        label: Text('Add Note'),
+        label: Text(getTranslations()['add_note']!),
         icon: Icon(Icons.note_add),
         backgroundColor: Colors.blue.shade50,
       ),
@@ -199,7 +201,7 @@ class NoteDetailPage extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Delete Note'),
+                    title: Text(getTranslations()['delete_note']!),
                     content: Text('Are you sure you want to delete this note?'),
                     actions: [
                       TextButton(
@@ -213,7 +215,7 @@ class NoteDetailPage extends StatelessWidget {
                           Navigator.pop(context);
                           Navigator.pop(context, note.id);
                         },
-                        child: Text('Delete'),
+                        child: Text(getTranslations()['delete']!),
                       ),
                     ],
                   );

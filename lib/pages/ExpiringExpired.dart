@@ -9,7 +9,7 @@ class ExpiringExpiredPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Expired Medicines'),
+        title: Text(getTranslations()['expired_medicines']!),
       ),
       body: AnimatedExpiredMedicinesList(),
     );
@@ -151,19 +151,19 @@ class _AnimatedExpiredMedicineListItemState extends State<AnimatedExpiredMedicin
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Name: ${widget.medicine['Name']}',
+              getTranslations()['name']!+': ${widget.medicine['Name']}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.0,
               ),
             ),
             SizedBox(height: 8.0),
-            Text('Quantity: ${widget.medicine['quantity']}'),
+            Text(getTranslations()['quantity']!+': ${widget.medicine['quantity']}'),
             SizedBox(height: 8.0),
-            Text('Expiring Date: ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
+            Text(getTranslations()['expire']!+': ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
             SizedBox(height: 8.0),
-            if (timeDifference.inDays >= 0) Text('Expiring After ${timeDifference.inDays} Days'),
-            if (timeDifference.isNegative) Text('Expired since ${timeDifference.inDays.abs()} Days'),
+            if (timeDifference.inDays >= 0) Text(getTranslations()['expiring_after']!+': ${timeDifference.inDays} Days'),
+            if (timeDifference.isNegative) Text(getTranslations()['expired_since']!+': ${timeDifference.inDays.abs()} Days'),
           ],
         ),
         Container(

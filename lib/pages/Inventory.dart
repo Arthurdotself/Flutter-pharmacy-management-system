@@ -264,7 +264,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       appBar: AppBar(
         title: FadeTransition(
           opacity: _fadeInAnimation,
-          child: Text('Inventory - $_pharmacyName'),
+          child: Text(getTranslations()['inventory']!+' - $_pharmacyName'),
         ),
       ),
       body: Column(
@@ -276,7 +276,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
               opacity: _fadeInAnimation,
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search...',
+                  hintText: getTranslations()['search']!,
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -293,8 +293,8 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                   child: FadeTransition(
                     opacity: _fadeInAnimation,
                     child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
+                      decoration:  InputDecoration(
+                        labelText: getTranslations()['category']!,
                         border: InputBorder.none,
                       ),
                       style: const TextStyle(
@@ -395,49 +395,6 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                   ),
                 ),
                 const SizedBox(width: 70.0),
-                // Expanded(
-                //   child: FadeTransition(
-                //     opacity: _fadeInAnimation,
-                //     child: DropdownButtonFormField<String>(
-                //       decoration: const InputDecoration(
-                //         labelText: 'Sort By',
-                //         border: InputBorder.none,
-                //       ),
-                //       style: const TextStyle(
-                //         fontSize: 16.0,
-                //         color: Colors.black87,
-                //       ),
-                //       dropdownColor: Colors.white,
-                //       items: const [
-                //         DropdownMenuItem(
-                //           value: 'name',
-                //           child: Text(
-                //             'Name',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         // DropdownMenuItem(
-                //         //   value: 'price',
-                //         //   child: Text(
-                //         //     'Price',
-                //         //     style: TextStyle(color: Colors.black87),
-                //         //   ),
-                //         // ),
-                //       ],
-                //       onChanged: (value) {
-                //         setState(() {
-                //           // Handle sorting selection
-                //           if (value == 'name') {
-                //             _sortColumnIndex = 0;
-                //           } else if (value == 'price') {
-                //             _sortColumnIndex = 2;
-                //           }
-                //           _sortAscending = !_sortAscending;
-                //         });
-                //       },
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -454,7 +411,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                   columnSpacing: 45.0, // Adjust the spacing between columns
                   columns: [
                     DataColumn(
-                      label: const Text('Name'),
+                      label:  Text(getTranslations()['name']!),
                       onSort: (columnIndex, ascending) {
                         setState(() {
                           _sortAscending = ascending;
@@ -467,9 +424,9 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                         });
                       },
                     ),
-                    const DataColumn(label: Text('Brand')),
-                    const DataColumn(label: Text('Dose')),
-                    const DataColumn(label: Text('Quantity')), // Add new column for total amount
+                     DataColumn(label: Text(getTranslations()['brand']!)),
+                     DataColumn(label: Text(getTranslations()['dose']!)),
+                     DataColumn(label: Text(getTranslations()['quantity']!)), // Add new column for total amount
                   ],
                   rows: _data.map(
                         (item) {
@@ -541,13 +498,13 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4.0),
                     child: ListTile(
-                      title: Text('Expire: ${shipments[index]['expire']}'),
+                      title: Text(getTranslations()['expire']!+': ${shipments[index]['expire']}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Cost: ${shipments[index]['cost']}'),
-                          Text('Price: ${shipments[index]['price']}'),
-                          Text('Amount: ${shipments[index]['amount']}'),
+                          Text( getTranslations()['cost']!+': ${shipments[index]['cost']}'),
+                          Text(getTranslations()['price']!+': ${shipments[index]['price']}'),
+                          Text(getTranslations()['amount']!+': ${shipments[index]['amount']}'),
                         ],
                       ),
                     ),

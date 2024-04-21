@@ -36,12 +36,12 @@ class _TasksPageState extends State<TasksPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title:  Text(getTranslations()['tasks']!),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Unfinished Tasks'),
-            Tab(text: 'Completed Tasks'),
+          tabs:  [
+            Tab(text: getTranslations()['unfinished_tasks']!),
+            Tab(text: getTranslations()['completed_tasks']!),
           ],
         ),
       ),
@@ -148,7 +148,7 @@ class UnfinishedTasksPage extends StatelessWidget {
               onPressed: () {
                 createTaskDocument(context);
               },
-              child: const Text('Create New Task'),
+              child:  Text(getTranslations()['create_new_task']!),
             ),
           ],
         ),
@@ -164,18 +164,18 @@ class UnfinishedTasksPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Create New Task'),
+          title: Text(getTranslations()['create_new_task']!),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(labelText: getTranslations()['title']!),
               ),
               TextField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(labelText: getTranslations()['description']!),
               ),
             ],
           ),
