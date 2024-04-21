@@ -270,15 +270,7 @@ class SettingsPage extends StatelessWidget {
               applicationLegalese: '© 2024 Cihan University\n', // Your company name or legal information
               children: [
                 // Additional information about your app
-                Text('Introducing our cutting-edge Pharmacy Management System, the ultimate solution for pharmacists and pharmacy owners to streamline their operations and enhance efficiency. Our app revolutionizes the way pharmacies manage inventory, sales, and daily tasks, making every aspect of pharmacy management a breeze.'
-
-            'Effortlessly track and manage your inventory with real-time updates on stock levels, ensuring you never run out of essential medications or supplies. With intuitive inventory management features, you can easily organize products, track batch numbers, and monitor stock movement to optimize inventory levels and minimize waste.'
-
-              'Say goodbye to expired medications and wasted resources with our innovative expiry date tracking feature. Our app automatically alerts you when products are nearing their expiration date, allowing you to take proactive measures to prevent losses and maintain product quality.'
-
-            'Boost productivity and streamline workflows with our task management tools, designed to keep your pharmacy operations running smoothly. Assign tasks, set reminders, and track progress in real-time to ensure all essential activities are completed on time and with precision.'
-
-            'Experience the future of pharmacy management with our comprehensive app, empowering pharmacists to focus on delivering exceptional patient care while our technology handles the rest. Join the countless pharmacies worldwide already benefiting from our advanced features and take your pharmacy to new heights of success today.'),
+                Text(getTranslations()['about_description']!),
               ],
             );
           }),
