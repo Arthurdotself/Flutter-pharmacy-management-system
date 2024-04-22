@@ -128,12 +128,12 @@ class _SellsState extends State<Sells> with TickerProviderStateMixin {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          sellscanBarcode(context);
-        },
-        child: Icon(Icons.qr_code_scanner),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     sellscanBarcode(context);
+      //   },
+      //   child: Icon(Icons.qr_code_scanner),
+      // ),
 
     );
   }
