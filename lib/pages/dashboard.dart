@@ -57,88 +57,111 @@ class _DashboardPageState extends State<DashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // First section
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: (getTranslations()['medicines']!),
-                    icon: Icons.local_pharmacy,
-                    future: _medicinesCountFuture,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Inventory(),
-                        ),
-                      );
-                    },
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Container( // Container 1
+                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
+                    height: 190, // Specify the height as needed
+                    child: _buildDashboardItem(
+                      title: (getTranslations()['medicines']!),
+                      icon: Icons.local_pharmacy,
+                      future: _medicinesCountFuture,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Inventory(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: (getTranslations()['add_sells']!),
-                    icon: Icons.monetization_on,
-                    future: getSellsCount(),
-                    onTap: () {
-                      sellscanBarcode(context);
-                    },
+                  SizedBox(width: 10.0),
+                  Container( // Container 2
+                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
+                    height: 190, // Specify the height as needed
+                    child: _buildDashboardItem(
+                      title: (getTranslations()['add_sells']!),
+                      icon: Icons.monetization_on,
+                      future: getSellsCount(),
+                      onTap: () {
+                        sellscanBarcode(context);
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: (getTranslations()['expiring_expired']!),
-                    icon: Icons.timer,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ExpiringExpiredPage(),
-                        ),
-                      );
-                    },
+                  SizedBox(width: 10.0),
+                  Container( // Container 3
+                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
+                    height: 190, // Specify the height as needed
+                    child: _buildDashboardItem(
+                      title: (getTranslations()['expiring_expired']!),
+                      icon: Icons.timer,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ExpiringExpiredPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            SizedBox(height: 20.0),
+
+
+            SizedBox(height: 15.0),
             // Second section
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: (getTranslations()['patient_profile']!),
-                    icon: Icons.account_circle,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PatientProfilePage(),
-                        ),
-                      );
-                    },
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4619, // Adjust the width as needed
+                    height: 170, // Specify the height as needed
+                    child: Expanded(
+                      child: _buildDashboardItem(
+                        title: (getTranslations()['patient_profile']!),
+                        icon: Icons.account_circle,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PatientProfilePage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(width: 10.0),
-                Expanded(
-                  child: _buildDashboardItem(
-                    title: (getTranslations()['tasks']!),
-                    icon: Icons.assignment,
-                    future: countTasks(context),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TasksPage(),
-                        ),
-                      );
-                    },
+                  SizedBox(width: 10.0),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4619, // Adjust the width as needed
+                    height: 170, // Specify the height as needed
+                    child: Expanded(
+                      child: _buildDashboardItem(
+                        title: (getTranslations()['tasks']!),
+                        icon: Icons.assignment,
+                        future: countTasks(context),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TasksPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+
             SizedBox(height: 20.0),
             // Third section (Bar chart)
             Text(
