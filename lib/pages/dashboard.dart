@@ -62,14 +62,13 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 children: [
                   Container( // Container 1
-                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
-                    height: 190, // Specify the height as needed
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    height: 190,
                     child: _buildDashboardItem(
                       title: (getTranslations()['medicines']!),
                       icon: Icons.local_pharmacy,
                       future: _medicinesCountFuture,
                       onTap: () {
-                        Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -81,7 +80,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   SizedBox(width: 10.0),
                   Container( // Container 2
-                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
+                    width: MediaQuery.of(context).size.width * 0.3,
                     height: 190, // Specify the height as needed
                     child: _buildDashboardItem(
                       title: (getTranslations()['add_sells']!),
@@ -94,8 +93,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   SizedBox(width: 10.0),
                   Container( // Container 3
-                    width: MediaQuery.of(context).size.width * 0.3, // Adjust the width as needed
-                    height: 190, // Specify the height as needed
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    height: 190,
                     child: _buildDashboardItem(
                       title: (getTranslations()['expiring_expired']!),
                       icon: Icons.timer,
@@ -121,8 +120,8 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4619, // Adjust the width as needed
-                    height: 170, // Specify the height as needed
+                    width: MediaQuery.of(context).size.width * 0.4619,
+                    height: 170,
                     child: Expanded(
                       child: _buildDashboardItem(
                         title: (getTranslations()['patient_profile']!),
@@ -140,8 +139,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   SizedBox(width: 10.0),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4619, // Adjust the width as needed
-                    height: 170, // Specify the height as needed
+                    width: MediaQuery.of(context).size.width * 0.4619,
+                    height: 170,
                     child: Expanded(
                       child: _buildDashboardItem(
                         title: (getTranslations()['tasks']!),

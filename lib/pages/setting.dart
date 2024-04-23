@@ -23,7 +23,7 @@ class LanguageSelectionPage extends StatelessWidget {
               UserProvider userProvider = Provider.of<UserProvider>(
                   context, listen: false);
               userProvider.setLangKey('en');
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => MyApp()),
               );
@@ -38,7 +38,7 @@ class LanguageSelectionPage extends StatelessWidget {
               UserProvider userProvider = Provider.of<UserProvider>(
                   context, listen: false);
               userProvider.setLangKey('ku');
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => MyApp()),
               );
@@ -52,13 +52,26 @@ class LanguageSelectionPage extends StatelessWidget {
               UserProvider userProvider = Provider.of<UserProvider>(
                   context, listen: false);
               userProvider.setLangKey('ar');
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => MyApp()),
               );
             },
           ),
-          // Add more languages as needed
+          ListTile(
+            title: Text('日本語'),
+            onTap: () {
+              // Set selected language to Spanish
+              // You can implement language selection logic here
+              UserProvider userProvider = Provider.of<UserProvider>(
+                  context, listen: false);
+              userProvider.setLangKey('jp');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MyApp()),
+              );
+            },
+          ),
         ],
       ),
     );
