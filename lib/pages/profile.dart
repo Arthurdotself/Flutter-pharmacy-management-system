@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase authentica
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/backend/user_provider.dart';
-
 import '../backend/functions.dart'; // Import your UserProvider
+import 'dashboard.dart';
+
 
 class EditProfilePage extends StatefulWidget {
   @override
@@ -192,7 +193,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 await _updateProfile(newName, newEmail, newUser, newBio);
 
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => DashboardPage()),
+                );
+
               },
               child: Text(getTranslations()['save']!),
             ),
@@ -202,6 +207,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
   Future<void> _updatePharmacyId(String selectedPharmacy) async {
+
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       // Find the selected pharmacy in the _pharmacies list
@@ -209,11 +215,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       // Retrieve the ID of the selected pharmacy
       String selectedPharmacyId = selectedPharmacyMap['id'];
-
+      UserProvider userProvider = Provider.of<UserProvider>(
+          context, listen: false);
+      userProvider.setPharmacyId(selectedPharmacyId);
       // Update the 'pharmacyId' field in Firestore with the ID of the selected pharmacy
       await FirebaseFirestore.instance.collection('users').doc(userProvider.userId).update({
         'pharmacyId': selectedPharmacyId,
       });
+
+
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
