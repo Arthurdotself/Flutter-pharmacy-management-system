@@ -18,7 +18,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   TextEditingController _bioController = TextEditingController();
   TextEditingController _searchController = TextEditingController();
 
-  List<String> _pharmacies = [];
+  List<Map<String, dynamic>> _pharmacies = [];
   List<String> _filteredPharmacies = [];
   bool _searchPharmacyMode = false; // Flag to indicate if pharmacy field is in search mode
 
@@ -47,19 +47,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     }
   }
-
+ // List<Map<String, dynamic>> _pharmacies = [];
   Future<void> _fetchPharmacies() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('pharmacies').get();
 
     setState(() {
-      _pharmacies = snapshot.docs.map((doc) => doc['name'] as String).toList();
-      _filteredPharmacies = _pharmacies;
+      _pharmacies = snapshot.docs.map((doc) => {
+        'name': doc['name'] as String,
+        'id': doc.id,
+      }).cast<Map<String, dynamic>>().toList();
+      _filteredPharmacies = _pharmacies.map((pharmacy) => pharmacy['name'] as String).toList();
     });
   }
 
+  Map<String, String> pharmacyIdMap = {
+    // Add your pharmacy name to ID mapping here
+    'PharmacyName1': 'PharmacyId1',
+    'PharmacyName2': 'PharmacyId2',
+    // Add more mappings as needed
+  };
+
   void _filterPharmacies(String query) {
     setState(() {
-      _filteredPharmacies = _pharmacies.where((pharmacy) => pharmacy.toLowerCase().contains(query.toLowerCase())).toList();
+      _filteredPharmacies = _pharmacies
+          .where((pharmacy) => (pharmacy['name'] as String).toLowerCase().contains(query.toLowerCase()))
+          .map((pharmacy) => pharmacy['name'] as String)
+          .toList();
     });
   }
 
@@ -159,8 +172,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     return ListTile(
                       title: Text(_filteredPharmacies[index]),
                       onTap: () {
+                        // Update the bioController text with the selected pharmacy
                         _bioController.text = _filteredPharmacies[index];
-                      },
+
+                        // Update 'pharmacyId' field in Firestore
+                        _updatePharmacyId(_filteredPharmacies[index]);                      },
                     );
                   },
                 ),
@@ -185,6 +201,36 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
+  Future<void> _updatePharmacyId(String selectedPharmacy) async {
+    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      // Find the selected pharmacy in the _pharmacies list
+      var selectedPharmacyMap = _pharmacies.firstWhere((pharmacy) => pharmacy['name'] == selectedPharmacy);
+
+      // Retrieve the ID of the selected pharmacy
+      String selectedPharmacyId = selectedPharmacyMap['id'];
+
+      // Update the 'pharmacyId' field in Firestore with the ID of the selected pharmacy
+      await FirebaseFirestore.instance.collection('users').doc(userProvider.userId).update({
+        'pharmacyId': selectedPharmacyId,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Pharmacy updated successfully'),
+        ),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating pharmacy: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
 
   Future<void> _updateProfile(String newName, String newEmail, String newUser, String newBio) async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
