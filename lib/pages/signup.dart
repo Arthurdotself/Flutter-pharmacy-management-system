@@ -157,6 +157,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                     'pharmacyId': ''
                     // Add more fields as needed
                   });
+                  _showAccountCreatedDialog();
 
                   print('User signed up and document created in Firestore.');
                 } catch (error) {
@@ -183,7 +184,29 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
       ],
     );
   }
-
+  void _showAccountCreatedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Account Created"),
+          content: Text("Your account has been created successfully."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                //Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   void dispose() {
     _animationController.dispose();

@@ -13,6 +13,7 @@ import 'package:tugas1_login/pages/ExpiringExpired.dart';
 import 'package:tugas1_login/pages/patientProfile.dart';
 import '../backend/functions.dart';
 import 'package:intl/intl.dart';
+import 'package:tugas1_login/pages/managePharmacy.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -377,121 +378,258 @@ class NavBar extends StatelessWidget {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else {
             var userData = snapshot.data!.data() as Map<String, dynamic>?;
-            var userName = userData?['name'] ?? 'Name';
             var userEmail = userData?['email'] ?? 'Email';
-
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-              children: [
-                DrawerHeader(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            return FutureBuilder<bool>(
+              future: checkOwnership(userEmail),
+              builder: (context, ownershipSnapshot) {
+                if (ownershipSnapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (ownershipSnapshot.hasError || !ownershipSnapshot.data!) {
+                  // If ownership check fails or user is not the owner, hide the "Manager" item
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
                     children: [
-                      GestureDetector(
-                        onTap: () => uploadImage(context),
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            userData?['photoURL'] ?? 'https://firebasestorage.googleapis.com/v0/b/pharmacy-management-syst-cdbf2.appspot.com/o/2df47b6e-2d22-419e-979c-a2899a5be168.jpeg?alt=media&token=283932e4-414c-44c2-820f-2204fb12b41e',
-                          ),
-                          radius: 40,
+                      DrawerHeader(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () => uploadImage(context),
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  userData?['photoURL'] ?? 'https://firebasestorage.googleapis.com/v0/b/pharmacy-management-syst-cdbf2.appspot.com/o/2df47b6e-2d22-419e-979c-a2899a5be168.jpeg?alt=media&token=283932e4-414c-44c2-820f-2204fb12b41e',
+                                ),
+                                radius: 40,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              userData?['name'] ?? 'Name',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              userEmail,
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        userName,
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 16,
-                        ),
+                      ListTile(
+                        leading: Icon(Icons.home_outlined),
+                        title: Text(getTranslations()['home']!),
+                        onTap: () {
+                          Navigator.pop(context);
+
+                        },
                       ),
-                      Text(
-                        userEmail,
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
+                      ListTile(
+                        leading: Icon(Icons.inventory_2_outlined),
+                        title: Text(getTranslations()['inventory']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Inventory(),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.attach_money_outlined),
+                        title: Text(getTranslations()['sells']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Sells(userEmail: userEmail, pharmacyId: pharmacyId),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.note_outlined),
+                        title: Text(getTranslations()['notes']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotesPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.settings),
+                        title: Text(getTranslations()['settings']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SettingsPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.logout),
+                        title: Text(getTranslations()['logout']!),
+                        onTap: () {
+                          UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                          userProvider.setUserId('');
+                          userProvider.setPharmacyId('');
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyApp(),
+                            ),
+                          );
+                        },
                       ),
                     ],
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.home_outlined),
-                  title: Text(getTranslations()['home']!),
-                  onTap: () {
-                    Navigator.pop(context);
-                    
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.inventory_2_outlined),
-                  title: Text(getTranslations()['inventory']!),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Inventory(),
+                  );
+                } else {
+                  // If user is the owner, display drawer with user's information and navigation items including the "Manager" item
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                    children: [
+                      DrawerHeader(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () => uploadImage(context),
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  userData?['photoURL'] ?? 'https://firebasestorage.googleapis.com/v0/b/pharmacy-management-syst-cdbf2.appspot.com/o/2df47b6e-2d22-419e-979c-a2899a5be168.jpeg?alt=media&token=283932e4-414c-44c2-820f-2204fb12b41e',
+                                ),
+                                radius: 40,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              userData?['name'] ?? 'Name',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              userEmail,
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.attach_money_outlined),
-                  title: Text(getTranslations()['sells']!),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Sells(userEmail: userEmail, pharmacyId: pharmacyId),
+                      ListTile(
+                        leading: Icon(Icons.home_outlined),
+                        title: Text(getTranslations()['home']!),
+                        onTap: () {
+                          Navigator.pop(context);
+
+                        },
                       ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.note_outlined),
-                  title: Text(getTranslations()['notes']!),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotesPage(),
+                      ListTile(
+                        leading: Icon(Icons.inventory_2_outlined),
+                        title: Text(getTranslations()['inventory']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Inventory(),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text(getTranslations()['settings']!),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsPage(),
+                      ListTile(
+                        leading: Icon(Icons.attach_money_outlined),
+                        title: Text(getTranslations()['sells']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Sells(userEmail: userEmail, pharmacyId: pharmacyId),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text(getTranslations()['logout']!),
-                  onTap: () {
-                    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-                    userProvider.setUserId('');
-                    userProvider.setPharmacyId('');
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyApp(),
+                      ListTile(
+                        leading: Icon(Icons.note_outlined),
+                        title: Text(getTranslations()['notes']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotesPage(),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ],
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.manage_accounts),
+                        title: Text('Manager'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PharmacyManagerApp(),
+                            ),
+                          );
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.settings),
+                        title: Text(getTranslations()['settings']!),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SettingsPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.logout),
+                        title: Text(getTranslations()['logout']!),
+                        onTap: () {
+                          UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+                          userProvider.setUserId('');
+                          userProvider.setPharmacyId('');
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyApp(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }
+              },
             );
           }
         },

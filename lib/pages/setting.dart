@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas1_login/pages/profile.dart';
@@ -163,7 +164,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  void _handleChangePassword() {
+  void _handleChangePassword() async {
     String currentPassword = _currentPasswordController.text;
     String newPassword = _newPasswordController.text;
     String confirmPassword = _confirmPasswordController.text;
@@ -180,15 +181,39 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
 
-    // Implement your logic for changing the password here
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
 
-    // Clear text fields after successful password change
-    _currentPasswordController.clear();
-    _newPasswordController.clear();
-    _confirmPasswordController.clear();
+    if (user != null) {
+      // Re-authenticate user
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
 
-    _showSnackBar(getTranslations()['password_changed_successfully']!);
+      try {
+        await user.reauthenticateWithCredential(credential);
+
+        // Update password
+        await user.updatePassword(newPassword);
+
+        // Clear text fields after successful password change
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+
+        _showSnackBar(getTranslations()['password_changed_successfully']!);
+      } catch (e) {
+        // Handle re-authentication or password update errors
+        _showSnackBar(getTranslations()['password_change_failed']!);
+        print("Error changing password: $e");
+      }
+    } else {
+      // Handle case where user is not logged in
+      _showSnackBar(getTranslations()['user_not_logged_in']!);
+    }
   }
+
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

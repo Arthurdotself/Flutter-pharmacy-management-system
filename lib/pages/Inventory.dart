@@ -17,7 +17,8 @@ late Timer _timer;
 class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
-
+  TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _filteredData = []; // Add filtered data list
   void _fetchAndUpdateMedicines() {
     _fetchMedicines(); // Fetch medicines from Firebase and update _data
     setState(() {}); // Update the UI
@@ -96,6 +97,8 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     setState(() {
       _data.clear();
       _data.addAll(newData);
+      _filteredData.clear();
+      _filteredData.addAll(newData);
     });
   }
 
@@ -275,6 +278,10 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
             child: FadeTransition(
               opacity: _fadeInAnimation,
               child: TextField(
+                controller: _searchController,
+                onChanged: (query) {
+                  _filterData(query);
+                },
                 decoration: InputDecoration(
                   hintText: getTranslations()['search']!,
                   prefixIcon: const Icon(Icons.search),
@@ -428,7 +435,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                      DataColumn(label: Text(getTranslations()['dose']!)),
                      DataColumn(label: Text(getTranslations()['quantity']!)), // Add new column for total amount
                   ],
-                  rows: _data.map(
+                  rows: _filteredData.map(
                         (item) {
                       // Calculate total amount
                       num totalAmount = 0;
@@ -479,6 +486,16 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
         child: const Icon(Icons.qr_code_scanner),
       ),
     );
+  }
+  void _filterData(String query) {
+    setState(() {
+      _filteredData = _data.where((item) {
+        final name = item['Name'].toLowerCase();
+        final brand = item['Brand'].toLowerCase();
+        final dose = item['Dose'].toString().toLowerCase();
+        return name.contains(query.toLowerCase()) || brand.contains(query.toLowerCase()) || dose.contains(query.toLowerCase());
+      }).toList();
+    });
   }
 
   void _showShipmentsDialog(List<dynamic> shipments) {

@@ -210,6 +210,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
+      // Retrieve the selected pharmacy document reference
+      QuerySnapshot pharmacySnapshot = await FirebaseFirestore.instance.collection('pharmacies').where('name', isEqualTo: selectedPharmacy).get();
+      if (pharmacySnapshot.docs.isNotEmpty) {
+        // Get the first document (assuming there's only one document with the given name)
+        DocumentReference pharmacyRef = pharmacySnapshot.docs[0].reference;
+
+        // Add the user's ID as a document inside the "users" subcollection of the selected pharmacy
+
+        await pharmacyRef.collection('users').doc(userEmail).set({
+          'approved': false,
+        });}
       // Find the selected pharmacy in the _pharmacies list
       var selectedPharmacyMap = _pharmacies.firstWhere((pharmacy) => pharmacy['name'] == selectedPharmacy);
 
@@ -222,7 +233,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       await FirebaseFirestore.instance.collection('users').doc(userProvider.userId).update({
         'pharmacyId': selectedPharmacyId,
       });
-
 
 
       ScaffoldMessenger.of(context).showSnackBar(

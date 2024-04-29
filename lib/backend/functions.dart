@@ -923,3 +923,14 @@ Map<String, String> getTranslations() {
       return english;
   }
 }
+Future<bool> checkOwnership(String userEmail) async {
+  try {
+    var pharmacyDoc = await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).get();
+    var pharmacyData = pharmacyDoc.data();
+    var owner = pharmacyData?['owner'];
+    return owner == userEmail;
+  } catch (e) {
+    print("Error checking ownership: $e");
+    return false; // Return false in case of any error
+  }
+}
