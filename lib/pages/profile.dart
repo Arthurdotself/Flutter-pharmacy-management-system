@@ -33,6 +33,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _fetchUserAndName();
     _fetchPharmacies();
   }
+  bool _isChangingEmail = false;
 
   Future<void> _fetchUserAndName() async {
     String? userId = _emailController.text;
@@ -100,7 +101,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: TextField(
                     controller: _emailController,
                     decoration: InputDecoration(labelText: getTranslations()['email']!),
-                    enabled: false,
+                    enabled: _isChangingEmail,
                   ),
                 ),
                 SizedBox(width: 16.0),
@@ -118,18 +119,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           AuthCredential credential = EmailAuthProvider.credential(email: user.email!, password: password);
                           await user.reauthenticateWithCredential(credential);
 
-                          // Update email address
-                          await user.updateEmail(_emailController.text);
-
-                          // Update email in UserProvider or wherever needed
-                          UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-                          userProvider.setUserId(_emailController.text);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(getTranslations()['email_updated_successfully']!),
-                            ),
-                          );
+                          // Enable email text field and change button text
+                          setState(() {
+                            _isChangingEmail = true;
+                          });
                         }
                       } catch (error) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -141,10 +134,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       }
                     }
                   },
-                  child: Text(getTranslations()['change_email']!),
+                  child: Text(_isChangingEmail ? getTranslations()['done']! : getTranslations()['change_email']!),
                 ),
-                SizedBox(width: 16.0),
 
+                SizedBox(width: 16.0),
               ],
             ),
             SizedBox(height: 16.0),

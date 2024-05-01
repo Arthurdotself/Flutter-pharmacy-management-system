@@ -8,7 +8,15 @@ import '../backend/user_provider.dart';
 import 'package:tugas1_login/main.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
+import 'FeedbackScreen.dart';
+import 'ReportIssue.dart';
+
 class LanguageSelectionPage extends StatelessWidget {
+
+  void main() async {
+    FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,9 +259,10 @@ class SettingsPage extends StatelessWidget {
           }),
           _buildDivider(),
           _buildHeader(getTranslations()['notifications']!),
-          _buildSwitchListItem(getTranslations()['receive_notifications']!, true, (bool value) {
-            // Handle switch value change
-          }),
+          _buildSwitchListItem(
+            getTranslations()['receive_notifications']!,
+            false, // Set the switch to the desired initial state
+          ),
           _buildDivider(),
           _buildHeader(getTranslations()['app_settings']!),
           _buildListItem(Icons.language, getTranslations()['language']!, () {
@@ -285,14 +294,20 @@ class SettingsPage extends StatelessWidget {
                         leading: Icon(Icons.bug_report),
                         title: Text(getTranslations()['report_an_issue']!),
                         onTap: () {
-                          FirebaseCrashlytics.instance.crash();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ReportIssueScreen()),
+                          );
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.feedback),
                         title: Text(getTranslations()['provide_feedback']!),
                         onTap: () {
-                          // Implement feedback functionality
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FeedbackScreen()),
+                          );
                         },
                       ),
                     ],
@@ -334,6 +349,7 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
+}
 
   Widget _buildListItem(IconData icon, String title, VoidCallback onTap, {Color? color}) {
     return ListTile(
@@ -345,16 +361,18 @@ class SettingsPage extends StatelessWidget {
       onTap: onTap,
     );
   }
+Widget _buildSwitchListItem(String title, bool value) {
+  return ListTile(
+    title: Text(title),
+    trailing: Switch(
+      value: value,
+      onChanged: (bool newValue) {}, // Dummy function
+    ),
+  );
+}
 
-  Widget _buildSwitchListItem(String title, bool value, ValueChanged<bool> onChanged) {
-    return ListTile(
-      title: Text(title),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
-    );
-  }
+
+
 
   Widget _buildDivider() {
     return Divider(
@@ -362,11 +380,11 @@ class SettingsPage extends StatelessWidget {
       height: 1,
     );
   }
-}
+
 
 void _contactSupport(BuildContext context) {
   // Replace 'supportEmailAddress' with your support email address
-  final supportEmailAddress = 'support@example.com';
+  final supportEmailAddress = 'support@pharmassist.com';
 
   // Replace 'subject' with a suitable subject line for the email
   final subject = 'PharmAssist Support Request';

@@ -50,10 +50,12 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
         appBar: AppBar(
           title:  Text(getTranslations()['sign_up_screen']!),
         ),
-        body: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: _buildSignupForm(),
+        body: SingleChildScrollView( // Wrap with SingleChildScrollView
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: _buildSignupForm(),
+            ),
           ),
         ),
       ),
