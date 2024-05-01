@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,13 +33,27 @@ class _DashboardPageState extends State<DashboardPage> {
     setUserEmail(context);
     super.initState();
     _medicinesCountFuture = getMedicinesCount();
-    fetchSellsData(selectedDate: '7').then((data) {
+
+    // Start fetching data every 5 seconds
+    startFetchingData();
+  }
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _timer.cancel();
+    super.dispose();
+  }
+  late Timer _timer;
+
+  void startFetchingData() {
+    // Start a periodic timer that calls fetchSellsData every 5 seconds
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      var data = await fetchSellsData(selectedDate: '7');
       setState(() {
         dailySales = data.cast<CounterData>();
       });
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +102,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     child: _buildDashboardItem(
                       title: (getTranslations()['add_sells']!),
                       icon: Icons.monetization_on,
-                      future: getSellsCount(),
+                    //  future: getSellsCount(),
                       onTap: () {
                         sellscanBarcode(context);
                       },

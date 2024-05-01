@@ -110,11 +110,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                     if (user != null) {
                       try {
-                        String? newPassword = await _showPasswordDialog();
+                        // Prompt user to re-enter password for security
+                        String? password = await _showPasswordDialog();
 
-                        if (newPassword != null) {
+                        if (password != null) {
+                          // Re-authenticate the user
+                          AuthCredential credential = EmailAuthProvider.credential(email: user.email!, password: password);
+                          await user.reauthenticateWithCredential(credential);
+
+                          // Update email address
                           await user.updateEmail(_emailController.text);
 
+                          // Update email in UserProvider or wherever needed
                           UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
                           userProvider.setUserId(_emailController.text);
 
@@ -127,7 +134,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       } catch (error) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(getTranslations()['error_updating_email']!+': $error'),
+                            content: Text(getTranslations()['error_updating_email']! + ': $error'),
                             backgroundColor: Colors.red,
                           ),
                         );

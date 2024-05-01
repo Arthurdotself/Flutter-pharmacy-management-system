@@ -5,12 +5,16 @@ import 'package:tugas1_login/backend/user_provider.dart'; // Import your UserPro
 import 'firebase_options.dart';
 import 'package:tugas1_login/pages/login.dart';
 import 'package:tugas1_login/pages/dashboard.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+
   runApp(MyApp());
 }
 

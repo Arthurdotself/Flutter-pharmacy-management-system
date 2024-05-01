@@ -40,7 +40,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     );
 
     // Start the timer when the widget is initialized
-    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
+    _timer = Timer.periodic(const Duration(seconds: 10), (Timer t) {
       _fetchAndUpdateMedicines(); // Call the function to fetch and update medicines
     });
 

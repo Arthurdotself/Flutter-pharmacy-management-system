@@ -51,6 +51,9 @@ dependencies:
   provider: ^6.1.1
   firebase_storage_web: ^3.9.1
   web: ^0.5.0
+  firebase_crashlytics: ^3.5.4
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

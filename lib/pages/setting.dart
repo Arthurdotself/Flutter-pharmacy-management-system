@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../backend/functions.dart';
 import '../backend/user_provider.dart';
 import 'package:tugas1_login/main.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class LanguageSelectionPage extends StatelessWidget {
   @override
@@ -284,7 +285,7 @@ class SettingsPage extends StatelessWidget {
                         leading: Icon(Icons.bug_report),
                         title: Text(getTranslations()['report_an_issue']!),
                         onTap: () {
-                          // Implement report issue functionality
+                          FirebaseCrashlytics.instance.crash();
                         },
                       ),
                       ListTile(
