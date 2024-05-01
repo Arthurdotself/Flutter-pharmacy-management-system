@@ -124,7 +124,8 @@ Future<void> sellscanBarcode(BuildContext context) async {
 void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
   String productName = '';
   double price = 0.0;
-  int quantity = 0;
+  int quantity = 1;
+  int amount = 0; // Change type to int
   String selectedExpirationDate = '';
   List<String> expirationDates = [];
   List<dynamic> shipments = [];
@@ -140,9 +141,7 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
     if (docSnapshot.exists) {
       final data = docSnapshot.data() as Map<String, dynamic>;
       productName = data['Name'] ?? '';
-      quantity = data['quantity'] ?? 0;
-
-      // Assign value to shipments
+      quantity = data['quantity'] ?? 1;
       shipments = data['shipments'] ?? [];
 
       if (shipments.isNotEmpty) {
@@ -163,8 +162,12 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
               Timestamp expireTimestamp = shipment['expire'];
               String expireDate = expireTimestamp.toDate().toString();
               if (expireDate == selectedExpirationDate) {
-                price = shipment['price'] != null ? double.parse(
-                    shipment['price'].toString()) : 0.0;
+                price = shipment['price'] != null
+                    ? double.parse(shipment['price'].toString())
+                    : 0.0;
+                amount = shipment['amount'] != null
+                    ? int.parse(shipment['amount'].toString())
+                    : 0;
                 break;
               }
             }
@@ -183,20 +186,22 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title:  Text(getTranslations()['add_sell']!),
+            title: Text(getTranslations()['add_sell']!),
             content: SingleChildScrollView(
               child: Column(
                 children: [
                   Text(selectedExpirationDate.isNotEmpty
-                      ? getTranslations()['product_name']!+': $productName'
+                      ? getTranslations()['product_name']! + ': $productName'
                       : getTranslations()['no_product_name_available']!),
-
                   Text(selectedExpirationDate.isNotEmpty
-                      ? getTranslations()['price']!+': $price'
+                      ? getTranslations()['price']! + ': $price'
                       : getTranslations()['no_price_available']!),
+                  Text(selectedExpirationDate.isNotEmpty
+                      ? getTranslations()['amount']! + ': $amount'
+                      : getTranslations()['no_amount_available']!),
                   TextFormField(
                     initialValue: '1',
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       labelText: getTranslations()['quantity']!,
                     ),
                     keyboardType: TextInputType.number,
@@ -206,18 +211,25 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
                   ),
                   DropdownButtonFormField<String>(
                     value: selectedExpirationDate,
-                    decoration:  InputDecoration(
-                        labelText: getTranslations()['expire']!),
+                    decoration: InputDecoration(
+                      labelText: getTranslations()['expire']!,
+                    ),
                     onChanged: (value) {
                       setState(() {
                         selectedExpirationDate = value!;
                         for (final shipment in shipments) {
                           Timestamp expireTimestamp = shipment['expire'];
-                          String expireDate = expireTimestamp.toDate()
-                              .toString();
+                          String expireDate =
+                          expireTimestamp.toDate().toString();
                           if (expireDate == selectedExpirationDate) {
-                            price = shipment['price'] != null ? double.parse(
-                                shipment['price'].toString()) : 0.0;
+                            price = shipment['price'] != null
+                                ? double.parse(
+                                shipment['price'].toString())
+                                : 0.0;
+                            amount = shipment['amount'] != null
+                                ? int.parse(
+                                shipment['amount'].toString())
+                                : 0;
                             break;
                           }
                         }
@@ -238,16 +250,51 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child:  Text("Cancel"),
+                child: Text("Cancel"),
               ),
               TextButton(
-                onPressed: () {
-                  addSell(scannedBarcode, productName, price, quantity,
-                      selectedExpirationDate);
+                onPressed: () async {
+                  // Calculate the total quantity
+                  int totalQuantity =  amount - quantity;
+
+                  // Update the amount in the corresponding shipment document in Firestore
+                  try {
+                    final docRef = FirebaseFirestore.instance
+                        .collection('pharmacies')
+                        .doc(pharmacyId)
+                        .collection('medicines')
+                        .doc(scannedBarcode);
+
+                    final docSnapshot = await docRef.get();
+
+                    if (docSnapshot.exists) {
+                      List<dynamic> shipments = docSnapshot.data()?['shipments'] ?? [];
+
+                      for (int i = 0; i < shipments.length; i++) {
+                        Timestamp expireTimestamp = shipments[i]['expire'];
+                        String expireDate = expireTimestamp.toDate().toString();
+                        if (expireDate == selectedExpirationDate) {
+                          // Update the 'amount' field in the corresponding shipment document
+                          shipments[i]['amount'] = totalQuantity;
+
+                          // Update the Firestore document with the modified shipments list
+                          await docRef.update({'shipments': shipments});
+
+                          break;
+                        }
+                      }
+                    }
+                  } catch (error) {
+                    print(error);
+                  }
+
+                  // Call addSell with totalQuantity
+                  addSell(scannedBarcode, productName, price, totalQuantity, selectedExpirationDate);
                   Navigator.of(context).pop();
                 },
-                child:  Text("Save"),
+                child: Text("Save"),
               ),
+
             ],
           );
         },
@@ -255,6 +302,7 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
     },
   );
 }
+
 
 void addSell(String scannedBarcode, String productName, double price,
     int quantity, String expire) async {
@@ -606,7 +654,7 @@ Map<String, String> kurdish = {
   'sign_in_with_google': 'چوونه‌ ژووره‌وه‌ له‌گه‌ڵ جووگڵ',
   'user_not_found': 'هیچ بەکارهێنەرێک لەم پۆستی ئەلکترۆنیەیە نەدۆزرایەوە.',
   'dashboard': 'پانێڵی کاری',
-  'medicines': 'دواکان\n',
+  'medicines': 'دارمانكان\n',
   'add_sells': 'زیادکردنی فرۆشتن',
   'expiring_expired': 'پایانی و پایانی کراوە\n',
   'patient_profile': 'پڕۆفایلی بیمار\n',

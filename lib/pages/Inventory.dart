@@ -3,6 +3,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:tugas1_login/backend/functions.dart';
+import "package:intl/intl.dart";
 
 class Inventory extends StatefulWidget {
   const Inventory({Key? key}) : super(key: key);
@@ -128,7 +129,8 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     String brand = '';
     int dose = 0;
     int cost = 0;
-    String expire = '';
+    Timestamp? expire; // Declare expire as nullable
+
     String name = '';
     int price = 0;
     int amount = 0;
@@ -178,11 +180,30 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                     keyboardType: TextInputType.number,
                     controller: TextEditingController(text: dose.toString()),
                   ),
+                  TextButton(
+                    onPressed: () async {
+                      final selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(DateTime.now().year - 5),
+                        lastDate: DateTime(DateTime.now().year + 5),
+                      );
+                      if (selectedDate != null) {
+                        setState(() {
+                          expire = Timestamp.fromMillisecondsSinceEpoch(selectedDate.millisecondsSinceEpoch);
+                        });
+                      }
+                    },
+                    child: Text(
+                      expire != null ? DateFormat('yyyy-MM-dd').format(expire!.toDate()) : 'Select Date',
+                    ),
+                  ),
                   TextField(
                     onChanged: (value) {
-                      expire = value;
+                      cost = int.tryParse(value) ?? 0;
                     },
-                    decoration: const InputDecoration(labelText: 'Expire'),
+                    decoration: const InputDecoration(labelText: 'cost'),
+                    keyboardType: TextInputType.number,
                   ),
                   TextField(
                     onChanged: (value) {
@@ -210,10 +231,8 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
               ),
               TextButton(
                 onPressed: () async {
-                  if (name.isNotEmpty) {
-                    final pharmacySnapshot =
-                    await FirebaseFirestore.instance.collection('users').doc(userEmail).get();
-
+                  if (name.isNotEmpty && expire != null) {
+                    final pharmacySnapshot = await FirebaseFirestore.instance.collection('users').doc(userEmail).get();
                     final pharmacyId = pharmacySnapshot['pharmacyId'];
 
                     final docRef = FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).collection('medicines').doc(scannedBarcode);

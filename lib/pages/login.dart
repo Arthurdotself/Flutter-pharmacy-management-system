@@ -110,7 +110,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(90.0),
                 ),
-                labelText: getTranslations()['login_screen']!,
+                labelText: getTranslations()['password']!,
               ),
             ),
           ),
