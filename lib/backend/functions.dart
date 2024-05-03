@@ -648,6 +648,12 @@ Map<String, String> arabic = {
   'today':'اليوم',
   'yesterday':'البارحه',
   'all':'كل الأوقات',
+  'new_note': 'ملاحظة جديدة',
+  'content': 'المحتوى',
+  'Title_and_content_cannot_be_empty': 'لا يمكن أن يكون العنوان والمحتوى فارغين',
+  'ok': 'حسناً',
+  'edit_note': 'تحرير المذكرة',
+  'Are_you_sure_you_want_to_delete_this_note': 'هل أنت متأكد أنك تريد حذف هذه المذكرة؟',
 };
 
 Map<String, String> kurdish = {
@@ -755,6 +761,12 @@ Map<String, String> kurdish = {
   'today': 'ئەمڕۆ',
   'yesterday': 'دوێنێ',
   'all': 'هەموو',
+  'new_note': 'تێبینی نوێ',
+  'content': 'ناوەرۆک',
+  'Title_and_content_cannot_be_empty': 'ناتوانێت سەرچاوە و ناوەڕۆک بەتال بێت',
+  'ok': 'باشە',
+  'edit_note': 'دەستکاری نۆت',
+  'Are_you_sure_you_want_to_delete_this_note': 'دڵنیایت کە دەتەوێت ئەم نوسینە بسڕیت؟',
 };
 
 Map<String, String> english = {
@@ -862,6 +874,12 @@ Map<String, String> english = {
   'today':'Today',
   'yesterday':'Yesterday',
   'all':'All',
+  'new_note':'New Note',
+  'content':'Content',
+  'Title_and_content_cannot_be_empty':'Title and content cannot be empty',
+  'ok':'OK',
+  'edit_note':'Edit Note',
+  'Are_you_sure_you_want_to_delete_this_note':'Are you sure you want to delete this note?',
 };
 
 Map<String, String> japanese = {
@@ -969,6 +987,12 @@ Map<String, String> japanese = {
   'today':'今日',
   'yesterday':'昨日',
   'all':'全て',
+  'new_note': '新規メモ',
+  'content': 'コンテンツ',
+  'Title_and_content_cannot_be_empty': 'タイトルと内容は空にできません',
+  'ok': 'OK',
+  'edit_note': 'メモの編集',
+  'Are_you_sure_you_want_to_delete_this_note': 'このメモを削除してもよろしいですか？',
 };
 
 

@@ -202,13 +202,13 @@ class NoteDetailPage extends StatelessWidget {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text(getTranslations()['delete_note']!),
-                    content: Text('Are you sure you want to delete this note?'),
+                    content: Text(getTranslations()['Are_you_sure_you_want_to_delete_this_note']!),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text('Cancel'),
+                        child: Text(getTranslations()['cancel']!),
                       ),
                       TextButton(
                         onPressed: () {
@@ -232,9 +232,10 @@ class NoteDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Category: ${note.category}',
+                '${getTranslations()['category']}: ${note.category}',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
+
               SizedBox(height: 8),
               Text(note.content),
             ],
@@ -267,7 +268,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
       _contentController.text = widget.note!.content;
       _categoryController.text = widget.note!.category;
     } else {
-      _titleController.text = 'New Note';
+      _titleController.text =  getTranslations()['new_note']!;
     }
   }
 
@@ -275,7 +276,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.note == null ? 'Add Note' : 'Edit Note'),
+        title: Text(widget.note == null ? getTranslations()['add_note']! : getTranslations()['add_note']!),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -285,14 +286,14 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                labelText: 'Title',
+                labelText: getTranslations()['title']!,
               ),
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _contentController,
               decoration: InputDecoration(
-                labelText: 'Content',
+                labelText: getTranslations()['content']!,
               ),
               maxLines: 3,
             ),
@@ -300,7 +301,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
             TextField(
               controller: _categoryController,
               decoration: InputDecoration(
-                labelText: 'Category',
+                labelText: getTranslations()['category']!,
               ),
             ),
             SizedBox(height: 16.0),
@@ -321,14 +322,14 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text('Error'),
-                        content: Text('Title and content cannot be empty.'),
+                        title: Text(getTranslations()['error']!),
+                        content: Text(getTranslations()['Title_and_content_cannot_be_empty']!),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text('OK'),
+                            child: Text(getTranslations()['error']!),
                           ),
                         ],
                       );
@@ -336,7 +337,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
                   );
                 }
               },
-              child: Text('Save'),
+              child: Text(getTranslations()['save']!),
             ),
           ],
         ),
