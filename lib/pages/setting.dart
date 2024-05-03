@@ -330,7 +330,15 @@ class SettingsPage extends StatelessWidget {
           }),
           _buildDivider(),
           _buildListItem(Icons.exit_to_app, getTranslations()['log_out']!, () {
-            // Implement log out functionality
+            UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+            userProvider.setUserId('');
+            userProvider.setPharmacyId('');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyApp(),
+              ),
+            );
           }, color: Colors.red),
         ],
       ),
