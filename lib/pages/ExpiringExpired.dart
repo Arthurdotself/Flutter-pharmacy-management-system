@@ -162,8 +162,9 @@ class _AnimatedExpiredMedicineListItemState extends State<AnimatedExpiredMedicin
             SizedBox(height: 8.0),
             Text(getTranslations()['expire']!+': ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
             SizedBox(height: 8.0),
-            if (timeDifference.inDays >= 0) Text(getTranslations()['expiring_after']!+': ${timeDifference.inDays} Days'),
-            if (timeDifference.isNegative) Text(getTranslations()['expired_since']!+': ${timeDifference.inDays.abs()} Days'),
+            if (timeDifference.inDays >= 0) Text('${getTranslations()['expiring_after']}: ${timeDifference.inDays} ${getTranslations()['days']}'),
+
+            if (timeDifference.isNegative) Text(getTranslations()['expired_since']!+': ${timeDifference.inDays.abs()} ${getTranslations()['days']}'),
           ],
         ),
         Container(

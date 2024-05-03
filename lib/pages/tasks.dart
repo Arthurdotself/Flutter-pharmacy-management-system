@@ -184,7 +184,7 @@ class UnfinishedTasksPage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text(getTranslations()['cancel']!),
             ),
             TextButton(
               onPressed: () async {
@@ -208,7 +208,7 @@ class UnfinishedTasksPage extends StatelessWidget {
                   }
                 }
               },
-              child: Text('Create'),
+              child: Text(getTranslations()['create']!),
             ),
           ],
         );
@@ -336,7 +336,7 @@ class TaskItem extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close'),
+              child: Text(getTranslations()['close']!),
             ),
           ],
         );
