@@ -387,10 +387,10 @@ void _contactSupport(BuildContext context) {
   final supportEmailAddress = 'support@pharmassist.com';
 
   // Replace 'subject' with a suitable subject line for the email
-  final subject = 'PharmAssist Support Request';
+  final subject = '';
 
   // You can also include additional details in the body of the email
-  final body = 'Please describe your issue or question here.';
+  final body = '';
 
   // Construct the email Uri
   final Uri emailUri = Uri(

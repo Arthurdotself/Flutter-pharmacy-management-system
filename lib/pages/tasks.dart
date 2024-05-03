@@ -36,10 +36,10 @@ class _TasksPageState extends State<TasksPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(getTranslations()['tasks']!),
+        title: Text(getTranslations()['tasks']!),
         bottom: TabBar(
           controller: _tabController,
-          tabs:  [
+          tabs: [
             Tab(text: getTranslations()['unfinished_tasks']!),
             Tab(text: getTranslations()['completed_tasks']!),
           ],
@@ -148,7 +148,7 @@ class UnfinishedTasksPage extends StatelessWidget {
               onPressed: () {
                 createTaskDocument(context);
               },
-              child:  Text(getTranslations()['create_new_task']!),
+              child: Text(getTranslations()['create_new_task']!),
             ),
           ],
         ),
@@ -273,7 +273,9 @@ class TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _showDescription(context);
+        if (!task.isCompleted) {
+          _showDescription(context);
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -294,7 +296,7 @@ class TaskItem extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                task.title, // Show title instead of description
+                task.title,
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -302,14 +304,19 @@ class TaskItem extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(
-              icon: Icon(
-                task.isCompleted ? Icons.check_circle : Icons.circle,
-                color: task.isCompleted ? Colors.green : Colors.grey,
+            IgnorePointer(
+              ignoring: task.isCompleted,
+              child: IconButton(
+                icon: Icon(
+                  task.isCompleted ? Icons.check_circle : Icons.circle,
+                  color: task.isCompleted ? Colors.green : Colors.grey,
+                ),
+                onPressed: () {
+                  if (!task.isCompleted) {
+                    _showConfirmationDialog(context);
+                  }
+                },
               ),
-              onPressed: () {
-                toggleTaskCompletion(context, task);
-              },
             ),
           ],
         ),
@@ -330,6 +337,33 @@ class TaskItem extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Task Completion'),
+          content: Text('Are you sure you want to mark this task as completed?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                toggleTaskCompletion(context, task);
+                Navigator.of(context).pop();
+              },
+              child: Text('Confirm'),
             ),
           ],
         );
