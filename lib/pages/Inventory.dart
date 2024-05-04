@@ -315,111 +315,111 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
               children: [
-                Expanded(
-                  child: FadeTransition(
-                    opacity: _fadeInAnimation,
-                    child: DropdownButtonFormField<String>(
-                      decoration:  InputDecoration(
-                        labelText: getTranslations()['category']!,
-                        border: InputBorder.none,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black87,
-                      ),
-                      dropdownColor: Colors.white,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'category0',
-                          child: Text(
-                            'All',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category1',
-                          child: Text(
-                            'Prescription Medications',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category2',
-                          child: Text(
-                            'Over-the-Counter (OTC) Medications',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category3',
-                          child: Text(
-                            'Health and Wellness Products',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category4',
-                          child: Text(
-                            'Personal Care Products',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category5',
-                          child: Text(
-                            'Medical Devices and Supplies',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category6',
-                          child: Text(
-                            'Home Health Care Equipment',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category7',
-                          child: Text(
-                            'Baby and Child Care Products',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category8',
-                          child: Text(
-                            'Diet and Nutrition Products',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category9',
-                          child: Text(
-                            'Smoking Cessation Aids',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category10',
-                          child: Text(
-                            'Incontinence Products',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'category11',
-                          child: Text(
-                            'Pet Medications and Supplies',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        // Handle category selection
-                      },
-                    ),
-                  ),
-                ),
+                // Expanded(
+                //   child: FadeTransition(
+                //     opacity: _fadeInAnimation,
+                //     child: DropdownButtonFormField<String>(
+                //       decoration:  InputDecoration(
+                //         labelText: getTranslations()['category']!,
+                //         border: InputBorder.none,
+                //       ),
+                //       style: const TextStyle(
+                //         fontSize: 16.0,
+                //         color: Colors.black87,
+                //       ),
+                //       dropdownColor: Colors.white,
+                //       items: const [
+                //         DropdownMenuItem(
+                //           value: 'category0',
+                //           child: Text(
+                //             'All',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category1',
+                //           child: Text(
+                //             'Prescription Medications',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category2',
+                //           child: Text(
+                //             'Over-the-Counter (OTC) Medications',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category3',
+                //           child: Text(
+                //             'Health and Wellness Products',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category4',
+                //           child: Text(
+                //             'Personal Care Products',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category5',
+                //           child: Text(
+                //             'Medical Devices and Supplies',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category6',
+                //           child: Text(
+                //             'Home Health Care Equipment',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category7',
+                //           child: Text(
+                //             'Baby and Child Care Products',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category8',
+                //           child: Text(
+                //             'Diet and Nutrition Products',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category9',
+                //           child: Text(
+                //             'Smoking Cessation Aids',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category10',
+                //           child: Text(
+                //             'Incontinence Products',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //         DropdownMenuItem(
+                //           value: 'category11',
+                //           child: Text(
+                //             'Pet Medications and Supplies',
+                //             style: TextStyle(color: Colors.black87),
+                //           ),
+                //         ),
+                //       ],
+                //       onChanged: (value) {
+                //         // Handle category selection
+                //       },
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(width: 70.0),
               ],
             ),

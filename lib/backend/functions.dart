@@ -124,6 +124,7 @@ Future<void> sellscanBarcode(BuildContext context) async {
 void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
   String productName = '';
   double price = 0.0;
+  double priceOf1Item= 0.0;
   int quantity = 1;
   int amount = 0; // Change type to int
   String selectedExpirationDate = '';
@@ -162,6 +163,9 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
               Timestamp expireTimestamp = shipment['expire'];
               String expireDate = expireTimestamp.toDate().toString();
               if (expireDate == selectedExpirationDate) {
+                priceOf1Item = shipment['price'] != null
+                    ? double.parse(shipment['price'].toString())
+                    : 0.0;
                 price = shipment['price'] != null
                     ? double.parse(shipment['price'].toString())
                     : 0.0;
@@ -206,7 +210,12 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      quantity = int.tryParse(value) ?? 0;
+                      setState(() {
+                        quantity = int.tryParse(value) ?? 0;
+                        // Update the price based on the new quantity
+                          price = quantity * priceOf1Item;
+
+                      });
                     },
                   ),
                   DropdownButtonFormField<String>(
@@ -222,13 +231,14 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
                           String expireDate =
                           expireTimestamp.toDate().toString();
                           if (expireDate == selectedExpirationDate) {
+                            priceOf1Item = shipment['price'] != null
+                                ? double.parse(shipment['price'].toString())
+                                : 0.0;
                             price = shipment['price'] != null
-                                ? double.parse(
-                                shipment['price'].toString())
+                                ? double.parse(shipment['price'].toString())
                                 : 0.0;
                             amount = shipment['amount'] != null
-                                ? int.parse(
-                                shipment['amount'].toString())
+                                ? int.parse(shipment['amount'].toString())
                                 : 0;
                             break;
                           }
@@ -289,7 +299,7 @@ void _showAddSellDialog(BuildContext context, String scannedBarcode) async {
                   }
 
                   // Call addSell with totalQuantity
-                  addSell(scannedBarcode, productName, price, totalQuantity, selectedExpirationDate);
+                  addSell(scannedBarcode, productName, price, quantity, selectedExpirationDate);
                   Navigator.of(context).pop();
                 },
                 child: Text("Save"),

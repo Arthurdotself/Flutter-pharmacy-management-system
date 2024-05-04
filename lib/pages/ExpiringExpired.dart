@@ -158,7 +158,7 @@ class _AnimatedExpiredMedicineListItemState extends State<AnimatedExpiredMedicin
               ),
             ),
             SizedBox(height: 8.0),
-            Text(getTranslations()['quantity']!+': ${widget.medicine['quantity']}'),
+           // Text(getTranslations()['quantity']!+': ${widget.medicine['quantity']}'),
             SizedBox(height: 8.0),
             Text(getTranslations()['expire']!+': ${DateFormat.yMMMMd().format(earliestExpiryDate)}'),
             SizedBox(height: 8.0),
