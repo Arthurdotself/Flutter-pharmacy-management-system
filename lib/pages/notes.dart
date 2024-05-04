@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../backend/functions.dart';
@@ -28,6 +29,35 @@ class NotesHomePage extends StatefulWidget {
 
 class _NotesHomePageState extends State<NotesHomePage> {
   List<Note> _notes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotes();
+  }
+
+  Future<void> _fetchNotes() async {
+    final notesSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userEmail)
+        .collection('notes')
+        .get();
+
+    final List<Note> loadedNotes = [];
+    notesSnapshot.docs.forEach((doc) {
+      final data = doc.data();
+      loadedNotes.add(Note(
+        id: doc.id,
+        title: data['title'],
+        content: data['content'],
+        category: data['category'],
+      ));
+    });
+
+    setState(() {
+      _notes = loadedNotes;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +105,7 @@ class _NotesHomePageState extends State<NotesHomePage> {
     );
   }
 }
+
 
 class Note {
   final String id;
@@ -306,7 +337,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final title = _titleController.text.trim();
                 final content = _contentController.text.trim();
                 if (title.isNotEmpty && content.isNotEmpty) {
@@ -316,7 +347,23 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
                     content: content,
                     category: _categoryController.text,
                   );
-                  Navigator.pop(context, newNote);
+
+                  try {
+                    await FirebaseFirestore.instance.collection('users').
+                    doc(userEmail).
+                    collection('notes').
+                    doc(newNote.id).set({
+                      'title': newNote.title,
+                      'content': newNote.content,
+                      'category': newNote.category,
+                      // Add other fields if necessary
+                    });
+
+                    Navigator.pop(context, newNote);
+                  } catch (e) {
+                    print('Error saving note: $e');
+                    // Handle error
+                  }
                 } else {
                   showDialog(
                     context: context,
@@ -339,6 +386,7 @@ class _AddEditNotePageState extends State<AddEditNotePage> {
               },
               child: Text(getTranslations()['save']!),
             ),
+
           ],
         ),
       ),
