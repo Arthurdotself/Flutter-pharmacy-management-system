@@ -62,11 +62,13 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
 
   Future<void> _fetchMedicines() async {
     // Fetch pharmacyId from user document
-    final userDataSnapshot = await FirebaseFirestore.instance.collection('users').doc(userEmail).get();
+    final userDataSnapshot =
+    await FirebaseFirestore.instance.collection('users').doc(userEmail).get();
     final pharmacyId = userDataSnapshot['pharmacyId'];
 
     // Fetch pharmacy name
-    final pharmacySnapshot = await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).get();
+    final pharmacySnapshot =
+    await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).get();
     if (pharmacySnapshot.exists) {
       setState(() {
         _pharmacyName = pharmacySnapshot['name'];
@@ -74,7 +76,8 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     }
 
     // Fetch all medicines for the pharmacyId
-    final querySnapshot = await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).collection('medicines').get();
+    final querySnapshot =
+    await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).collection('medicines').get();
 
     final List<Map<String, dynamic>> newData = [];
 
@@ -86,12 +89,24 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       final brand = data['Brand'] ?? '';
       final shipments = data['shipments'] ?? [];
 
+      // Convert Timestamps to formatted dates
+      final formattedShipments = shipments.map((shipment) {
+        final Timestamp expireTimestamp = shipment['expire'];
+        final DateTime expireDate = expireTimestamp.toDate();
+        final formattedExpireDate = DateFormat('dd/MM/yyyy').format(expireDate);
+
+        return {
+          ...shipment,
+          'expire': formattedExpireDate,
+        };
+      }).toList();
+
       newData.add({
         'id': id,
         'Name': name,
         'Dose': dose,
         'Brand': brand,
-        'Shipments': shipments,
+        'Shipments': formattedShipments,
       });
     }
 
@@ -102,7 +117,6 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       _filteredData.addAll(newData);
     });
   }
-
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
       '#ff6666', // Scanner overlay color
