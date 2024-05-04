@@ -85,7 +85,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(90.0),
               ),
-              labelText: getTranslations()['username']!,
+              labelText: getTranslations()['name']!,
             ),
           ),
         ),
@@ -153,9 +153,8 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
 
                   // Create a new document in Firestore with the email as document ID
                   await _firestore.collection('users').doc(email).set({
-                    'user': user,
+                    'name': user,
                     'email': email,
-                    'name': 'name',
                     'pharmacyId': ''
                     // Add more fields as needed
                   });
