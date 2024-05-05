@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:tugas1_login/backend/functions.dart';
-import "package:intl/intl.dart";
 
 class Inventory extends StatefulWidget {
   const Inventory({Key? key}) : super(key: key);
@@ -11,24 +11,20 @@ class Inventory extends StatefulWidget {
   @override
   _InventoryState createState() => _InventoryState();
 }
-
 String _pharmacyName = '';
-late Timer _timer;
 
 class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> _filteredData = []; // Add filtered data list
-  void _fetchAndUpdateMedicines() {
-    _fetchMedicines(); // Fetch medicines from Firebase and update _data
-    setState(() {}); // Update the UI
-  }
+  List<Map<String, dynamic>> _filteredData = [];
+  late Stream<List<Map<String, dynamic>>> _medicinesStream;
+  bool _showFilteredData = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchMedicines();
+    _medicinesStream = fetchMedicinesStream();
 
     _animationController = AnimationController(
       vsync: this,
@@ -39,19 +35,12 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    // Start the timer when the widget is initialized
-    _timer = Timer.periodic(const Duration(seconds: 10), (Timer t) {
-      _fetchAndUpdateMedicines(); // Call the function to fetch and update medicines
-    });
-
     _animationController.forward();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // Cancel the timer when the widget is disposed to prevent memory leaks
-    _timer.cancel();
     _animationController.dispose();
   }
 
@@ -60,69 +49,68 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _data = [];
 
-  Future<void> _fetchMedicines() async {
-    // Fetch pharmacyId from user document
-    final userDataSnapshot =
-    await FirebaseFirestore.instance.collection('users').doc(userEmail).get();
-    final pharmacyId = userDataSnapshot['pharmacyId'];
+  Stream<List<Map<String, dynamic>>> fetchMedicinesStream() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userEmail)
+        .snapshots()
+        .asyncMap((userSnapshot) async {
+      final pharmacyId = userSnapshot['pharmacyId'];
 
-    // Fetch pharmacy name
-    final pharmacySnapshot =
-    await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).get();
-    if (pharmacySnapshot.exists) {
-      setState(() {
-        _pharmacyName = pharmacySnapshot['name'];
-      });
-    }
+      final pharmacySnapshot =
+      await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).get();
+      if (pharmacySnapshot.exists) {
+        setState(() {
+          _pharmacyName = pharmacySnapshot['name'];
+        });
+      }
 
-    // Fetch all medicines for the pharmacyId
-    final querySnapshot =
-    await FirebaseFirestore.instance.collection('pharmacies').doc(pharmacyId).collection('medicines').get();
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('pharmacies')
+          .doc(pharmacyId)
+          .collection('medicines')
+          .get();
 
-    final List<Map<String, dynamic>> newData = [];
+      final List<Map<String, dynamic>> newData = [];
 
-    for (var doc in querySnapshot.docs) {
-      final id = doc.id;
-      final data = doc.data();
-      final name = data['Name'] ?? '';
-      final dose = data['Dose'] ?? '';
-      final brand = data['Brand'] ?? '';
-      final shipments = data['shipments'] ?? [];
+      for (var doc in querySnapshot.docs) {
+        final id = doc.id;
+        final data = doc.data();
+        final name = data['Name'] ?? '';
+        final dose = data['Dose'] ?? '';
+        final brand = data['Brand'] ?? '';
+        final shipments = data['shipments'] ?? [];
 
-      // Convert Timestamps to formatted dates
-      final formattedShipments = shipments.map((shipment) {
-        final Timestamp expireTimestamp = shipment['expire'];
-        final DateTime expireDate = expireTimestamp.toDate();
-        final formattedExpireDate = DateFormat('dd/MM/yyyy').format(expireDate);
+        final formattedShipments = shipments.map((shipment) {
+          final Timestamp expireTimestamp = shipment['expire'];
+          final DateTime expireDate = expireTimestamp.toDate();
+          final formattedExpireDate = DateFormat('dd/MM/yyyy').format(expireDate);
 
-        return {
-          ...shipment,
-          'expire': formattedExpireDate,
-        };
-      }).toList();
+          return {
+            ...shipment,
+            'expire': formattedExpireDate,
+          };
+        }).toList();
 
-      newData.add({
-        'id': id,
-        'Name': name,
-        'Dose': dose,
-        'Brand': brand,
-        'Shipments': formattedShipments,
-      });
-    }
+        newData.add({
+          'id': id,
+          'Name': name,
+          'Dose': dose,
+          'Brand': brand,
+          'Shipments': formattedShipments,
+        });
+      }
 
-    setState(() {
-      _data.clear();
-      _data.addAll(newData);
-      _filteredData.clear();
-      _filteredData.addAll(newData);
+      return newData;
     });
   }
+
   Future<void> _scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-      '#ff6666', // Scanner overlay color
-      'Cancel', // Cancel button text
-      true, // Use flash
-      ScanMode.BARCODE, // Scan mode
+      '#ff6666',
+      'Cancel',
+      true,
+      ScanMode.BARCODE,
     );
 
     if (!mounted) return;
@@ -131,7 +119,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Scanned Barcode: $barcodeScanRes $_pharmacyName'),
-          duration: const Duration(seconds: 3), // Adjust the duration as needed
+          duration: const Duration(seconds: 3),
         ),
       );
 
@@ -143,7 +131,7 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     String brand = '';
     int dose = 0;
     int cost = 0;
-    Timestamp? expire; // Declare expire as nullable
+    Timestamp? expire;
 
     String name = '';
     int price = 0;
@@ -154,12 +142,10 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
     final docSnapshot = await docRef.get();
 
     if (docSnapshot.exists) {
-      // Document exists, populate fields with existing values
       final data = docSnapshot.data() as Map<String, dynamic>;
       name = data['Name'] ?? '';
       brand = data['Brand'] ?? '';
       dose = data['Dose'] ?? 0;
-      // Populate other fields as needed
     }
 
     showDialog(
@@ -254,7 +240,6 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                     final docSnapshot = await docRef.get();
 
                     if (docSnapshot.exists) {
-                      // Document exists, update the array
                       await docRef.update({
                         'shipments': FieldValue.arrayUnion([
                           {
@@ -266,7 +251,6 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
                         ]),
                       });
                     } else {
-                      // Document does not exist, create a new document
                       await docRef.set({
                         'Name': name,
                         'Brand': brand,
@@ -312,12 +296,10 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
               opacity: _fadeInAnimation,
               child: TextField(
                 controller: _searchController,
-                onChanged: (query) {
-                  _filterData(query);
-                },
+                onChanged: _filterData,
                 decoration: InputDecoration(
                   hintText: getTranslations()['search']!,
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -325,208 +307,129 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: [
-                // Expanded(
-                //   child: FadeTransition(
-                //     opacity: _fadeInAnimation,
-                //     child: DropdownButtonFormField<String>(
-                //       decoration:  InputDecoration(
-                //         labelText: getTranslations()['category']!,
-                //         border: InputBorder.none,
-                //       ),
-                //       style: const TextStyle(
-                //         fontSize: 16.0,
-                //         color: Colors.black87,
-                //       ),
-                //       dropdownColor: Colors.white,
-                //       items: const [
-                //         DropdownMenuItem(
-                //           value: 'category0',
-                //           child: Text(
-                //             'All',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category1',
-                //           child: Text(
-                //             'Prescription Medications',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category2',
-                //           child: Text(
-                //             'Over-the-Counter (OTC) Medications',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category3',
-                //           child: Text(
-                //             'Health and Wellness Products',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category4',
-                //           child: Text(
-                //             'Personal Care Products',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category5',
-                //           child: Text(
-                //             'Medical Devices and Supplies',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category6',
-                //           child: Text(
-                //             'Home Health Care Equipment',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category7',
-                //           child: Text(
-                //             'Baby and Child Care Products',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category8',
-                //           child: Text(
-                //             'Diet and Nutrition Products',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category9',
-                //           child: Text(
-                //             'Smoking Cessation Aids',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category10',
-                //           child: Text(
-                //             'Incontinence Products',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //         DropdownMenuItem(
-                //           value: 'category11',
-                //           child: Text(
-                //             'Pet Medications and Supplies',
-                //             style: TextStyle(color: Colors.black87),
-                //           ),
-                //         ),
-                //       ],
-                //       onChanged: (value) {
-                //         // Handle category selection
-                //       },
-                //     ),
-                //   ),
-                // ),
-                const SizedBox(width: 70.0),
-              ],
-            ),
-          ),
           const SizedBox(height: 16.0),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: FadeTransition(
-                opacity: _fadeInAnimation,
-                child: DataTable(
-                  dataRowHeight: null, // Set dataRowHeight to null to remove checkboxes
-                  sortAscending: _sortAscending,
-                  sortColumnIndex: _sortColumnIndex,
-                  columnSpacing: 45.0, // Adjust the spacing between columns
-                  columns: [
-                    DataColumn(
-                      label:  Text(getTranslations()['name']!),
-                      onSort: (columnIndex, ascending) {
-                        setState(() {
-                          _sortAscending = ascending;
-                          _sortColumnIndex = columnIndex;
-                          if (ascending) {
-                            _data.sort((a, b) => a['Name'].compareTo(b['Name']));
-                          } else {
-                            _data.sort((a, b) => b['Name'].compareTo(a['Name']));
-                          }
-                        });
-                      },
-                    ),
-                     DataColumn(label: Text(getTranslations()['brand']!)),
-                     DataColumn(label: Text(getTranslations()['dose']!)),
-                     DataColumn(label: Text(getTranslations()['quantity']!)), // Add new column for total amount
-                  ],
-                  rows: _filteredData.map(
-                        (item) {
-                      // Calculate total amount
-                      num totalAmount = 0;
-                      item['Shipments']?.forEach((shipment) {
-                        totalAmount += shipment?['amount'] ?? 0;
-                      });
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _medicinesStream,
+              builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  if (_showFilteredData) {
+                    _filteredData = _data.where((item) {
+                      final name = item['Name'].toLowerCase();
+                      final brand = item['Brand'].toLowerCase();
+                      final dose = item['Dose'].toString().toLowerCase();
+                      return name.contains(_searchController.text.toLowerCase()) ||
+                          brand.contains(_searchController.text.toLowerCase()) ||
+                          dose.contains(_searchController.text.toLowerCase());
+                    }).toList();
+                  } else {
+                    _data.clear(); // Clear existing data
+                    _data.addAll(snapshot.data!); // Add new data from the snapshot
+                    _filteredData = List.from(_data); // Show all data initially
+                  }
 
-                      return DataRow(
-                        cells: [
-                          DataCell(
-                            GestureDetector(
-                              onTap: () {
-                                _showShipmentsDialog(item['Shipments']);
-                              },
-                              child: Text(item['Name']),
-                            ),
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: FadeTransition(
+                      opacity: _fadeInAnimation,
+                      child: DataTable(
+                        dataRowHeight: null,
+                        sortAscending: _sortAscending,
+                        sortColumnIndex: _sortColumnIndex,
+                        columnSpacing: 45.0,
+                        columns: [
+                          DataColumn(
+                            label: Text(getTranslations()['name']!),
+                            onSort: (columnIndex, ascending) {
+                              setState(() {
+                                _sortAscending = ascending;
+                                _sortColumnIndex = columnIndex;
+                                if (ascending) {
+                                  _filteredData.sort((a, b) => a['Name'].compareTo(b['Name']));
+                                } else {
+                                  _filteredData.sort((a, b) => b['Name'].compareTo(a['Name']));
+                                }
+                              });
+                            },
                           ),
-                          DataCell(
-                            GestureDetector(
-                              onTap: () {
-                                _showShipmentsDialog(item['Shipments']);
-                              },
-                              child: Text(item['Brand']),
-                            ),
-                          ),
-                          DataCell(
-                            GestureDetector(
-                              onTap: () {
-                                _showShipmentsDialog(item['Shipments']);
-                              },
-                              child: Text('${item['Dose']}'),
-                            ),
-                          ),
-                          DataCell(Text(totalAmount.toString())), // Convert to string
+                          DataColumn(label: Text(getTranslations()['brand']!)),
+                          DataColumn(label: Text(getTranslations()['dose']!)),
+                          DataColumn(label: Text(getTranslations()['quantity']!)),
                         ],
-                      );
-                    },
-                  ).toList(),
-                ),
-              ),
+                        rows: _filteredData.map((item) {
+                          num totalAmount = 0;
+                          item['Shipments']?.forEach((shipment) {
+                            totalAmount += shipment?['amount'] ?? 0;
+                          });
+
+                          return DataRow(
+                            cells: [
+                              DataCell(
+                                GestureDetector(
+                                  onTap: () {
+                                    _showShipmentsDialog(item['Shipments']);
+                                  },
+                                  child: Text(item['Name']),
+                                ),
+                              ),
+                              DataCell(
+                                GestureDetector(
+                                  onTap: () {
+                                    _showShipmentsDialog(item['Shipments']);
+                                  },
+                                  child: Text(item['Brand']),
+                                ),
+                              ),
+                              DataCell(
+                                GestureDetector(
+                                  onTap: () {
+                                    _showShipmentsDialog(item['Shipments']);
+                                  },
+                                  child: Text('${item['Dose']}'),
+                                ),
+                              ),
+                              DataCell(Text(totalAmount.toString())),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
           ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _scanBarcode,
         child: const Icon(Icons.qr_code_scanner),
       ),
     );
   }
+
   void _filterData(String query) {
+    if (query.isNotEmpty) {
+      setState(() {
+        _showFilteredData = true;
+      });
+    } else {
+      setState(() {
+        _showFilteredData = false;
+      });
+    }
     setState(() {
       _filteredData = _data.where((item) {
         final name = item['Name'].toLowerCase();
         final brand = item['Brand'].toLowerCase();
         final dose = item['Dose'].toString().toLowerCase();
-        return name.contains(query.toLowerCase()) || brand.contains(query.toLowerCase()) || dose.contains(query.toLowerCase());
+        return name.contains(query.toLowerCase()) ||
+            brand.contains(query.toLowerCase()) ||
+            dose.contains(query.toLowerCase());
       }).toList();
     });
   }
@@ -541,20 +444,20 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
             title: const Text('Shipments'),
             content: SizedBox(
               width: double.maxFinite,
-              height: 300.0, // Adjust the height as needed
+              height: 300.0,
               child: ListView.builder(
                 itemCount: shipments.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4.0),
                     child: ListTile(
-                      title: Text(getTranslations()['expire']!+': ${shipments[index]['expire']}'),
+                      title: Text(getTranslations()['expire']! + ': ${shipments[index]['expire']}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text( getTranslations()['cost']!+': ${shipments[index]['cost']}'),
-                          Text(getTranslations()['price']!+': ${shipments[index]['price']}'),
-                          Text(getTranslations()['amount']!+': ${shipments[index]['amount']}'),
+                          Text(getTranslations()['cost']! + ': ${shipments[index]['cost']}'),
+                          Text(getTranslations()['price']! + ': ${shipments[index]['price']}'),
+                          Text(getTranslations()['amount']! + ': ${shipments[index]['amount']}'),
                         ],
                       ),
                     ),
