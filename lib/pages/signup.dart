@@ -86,6 +86,8 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(90.0),
               ),
               labelText: getTranslations()['name']!,
+          //    errorText: user.isEmpty ? 'Please enter your name' : null,
+
             ),
           ),
         ),
@@ -100,6 +102,8 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(90.0),
               ),
               labelText: getTranslations()['email']!,
+         //     errorText: email.isEmpty ? 'Please enter your email' : null,
+
             ),
           ),
         ),
@@ -115,6 +119,8 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(90.0),
               ),
               labelText: getTranslations()['create_password']!,
+        //      errorText: password.isEmpty ? 'Please enter a password' : null,
+
             ),
           ),
         ),
@@ -130,6 +136,8 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(90.0),
               ),
               labelText: getTranslations()['re_enter_password']!,
+             // errorText: password0.isEmpty ? 'Please re-enter your password' : null,
+
             ),
           ),
         ),
@@ -208,6 +216,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
       },
     );
   }
+
   @override
   void dispose() {
     _animationController.dispose();

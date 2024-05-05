@@ -113,19 +113,22 @@ class _InventoryState extends State<Inventory> with TickerProviderStateMixin {
       ScanMode.BARCODE,
     );
 
-    if (!mounted) return;
+    if (barcodeScanRes != '-1') {
+      if (!mounted) return;
 
-    setState(() {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Scanned Barcode: $barcodeScanRes $_pharmacyName'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      setState(() {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Scanned Barcode: $barcodeScanRes $_pharmacyName'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
 
-      _showAddMedicineDialog(barcodeScanRes);
-    });
+        _showAddMedicineDialog(barcodeScanRes);
+      });
+    }
   }
+
 
   void _showAddMedicineDialog(String scannedBarcode) async {
     String brand = '';

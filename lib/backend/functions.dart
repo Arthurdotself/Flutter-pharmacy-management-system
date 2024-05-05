@@ -110,14 +110,15 @@ Future<void> sellscanBarcode(BuildContext context) async {
     ScanMode.BARCODE, // Scan mode
   );
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(getTranslations()['scanned_barcode']!+': $barcodeScanRes'),
-      duration: const Duration(seconds: 3), // Adjust the duration as needed
-    ),
-  );
-
-  _showAddSellDialog(context, barcodeScanRes);
+  if (barcodeScanRes != '-1') {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(getTranslations()['scanned_barcode']! + ': $barcodeScanRes'),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+    _showAddSellDialog(context, barcodeScanRes);
+  }
 }
 
 
